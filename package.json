@@ -10,8 +10,6 @@
     "test": "vitest run"
   },
   "devDependencies": {
-    "@esbuild/win32-x64": "^0.28.2",
-    "@rollup/rollup-win32-x64-msvc": "^4.64.3",
     "@types/node": "^26.6.4",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.47",
