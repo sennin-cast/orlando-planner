@@ -1,0 +1,2 @@
+Uma orientação adicional: ao enviar esse prompt ao Antigravity, peça que ele implemente primeiro o núcleo de calendário e ingressos, execute os testes e só depois avance para a otimização. Isso reduz a chance de terminar com uma interface elaborada e um motor de regras incompleto.
+O calendário do Undercover Tourist continuará sendo a referência principal para lotação, mas os números efetivos de maio de 2027 ainda precisarão ser importados ou verificados antes de o sistema calcular recomendações fundamentadas.

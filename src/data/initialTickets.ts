@@ -1,0 +1,67 @@
+import { TicketDefinition } from '../types/ticket';
+
+export const INITIAL_TICKETS: TicketDefinition[] = [
+  {
+    id: 'ticket-disney-4park',
+    name: 'Disney 4-Park Magic Pass',
+    operator: 'disney',
+    allowedParkIds: ['magic-kingdom', 'epcot', 'hollywood-studios', 'animal-kingdom'],
+    totalVisitsAllowed: 4,
+    allowParkRepetition: false,
+    validityWindowDays: 7, // Hipótese de 7 dias corridos a partir do primeiro uso
+    fixedStartDate: null,
+    fixedEndDate: null,
+    ruleStatus: 'pending_confirmation',
+    officialSourceNote: 'Hipótese de planejamento para 2027: 4 visitas em parques distintos dentro de 7 dias corridos. Sujeito à verificação do produto efetivamente adquirido.',
+    isIndependentTicket: false,
+  },
+  {
+    id: 'ticket-disney-mk-single',
+    name: 'Magic Kingdom — Ingresso Avulso',
+    operator: 'disney',
+    allowedParkIds: ['magic-kingdom'],
+    totalVisitsAllowed: 1,
+    allowParkRepetition: false,
+    validityWindowDays: 1,
+    fixedStartDate: '2027-05-23',
+    fixedEndDate: '2027-05-23',
+    ruleStatus: 'confirmed',
+    officialSourceNote: 'Ingresso de 1 dia avulso com data fixa e bloqueada para 23/05/2027. Totalmente independente do passe Disney anterior.',
+    isIndependentTicket: true,
+    lockedDate: '2027-05-23',
+  },
+  {
+    id: 'ticket-universal-multi',
+    name: 'Universal 3-Park Explorer / Epic Multiday',
+    operator: 'universal',
+    allowedParkIds: ['universal-studios', 'islands-of-adventure', 'epic-universe', 'volcano-bay'],
+    totalVisitsAllowed: 5,
+    allowParkRepetition: true,
+    maxRepetitionPerPark: {
+      'epic-universe': 2,
+      'universal-studios': 2,
+      'islands-of-adventure': 2,
+      'volcano-bay': 1,
+    },
+    validityWindowDays: 14, // Hipótese de 14 dias corridos
+    fixedStartDate: null,
+    fixedEndDate: null,
+    ruleStatus: 'pending_confirmation',
+    officialSourceNote: 'Hipótese inicial: janela estimada em 14 dias corridos. Necessário confirmar se o pacote de 2027 permite 2 entradas no Epic Universe e acesso ao Volcano Bay.',
+    isIndependentTicket: false,
+  },
+  {
+    id: 'ticket-seaworld-2park',
+    name: 'United Parks — SeaWorld & Busch Gardens 2-Park Pass',
+    operator: 'seaworld',
+    allowedParkIds: ['seaworld', 'busch-gardens'],
+    totalVisitsAllowed: 2,
+    allowParkRepetition: false,
+    validityWindowDays: 14, // Hipótese de 14 dias corridos
+    fixedStartDate: null,
+    fixedEndDate: null,
+    ruleStatus: 'pending_confirmation',
+    officialSourceNote: 'Passe de 2 parques (SeaWorld Orlando + Busch Gardens Tampa). Janela estimada em 14 dias corridos a partir do primeiro acesso, a confirmar.',
+    isIndependentTicket: false,
+  },
+];

@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body {
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9ff;
+    color: #111c2d;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  
+  /* Tabular numbers for all numeric and time metrics */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f0f3ff;
+}
+::-webkit-scrollbar-thumb {
+  background: #c2c6d2;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #727782;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Print Styles */
+@media print {
+  aside, header, nav, button, .no-print {
+    display: none !important;
+  }
+  .pl-\[230px\] {
+    padding-left: 0 !important;
+  }
+  main {
+    padding: 0 !important;
+    background: #ffffff !important;
+  }
+  .bg-surface, .bg-surface-container-low, .bg-surface-container-lowest {
+    background: transparent !important;
+  }
+  .shadow-sm, .shadow-md {
+    box-shadow: none !important;
+  }
+  table, tr, td, th {
+    page-break-inside: avoid;
+  }
+}

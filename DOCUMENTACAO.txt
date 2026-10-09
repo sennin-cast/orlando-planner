@@ -1,0 +1,205 @@
+ORLANDO PLANNER — Conclusão do Desenvolvimento
+A aplicação web ORLANDO PLANNER foi desenvolvida, testada e compilada com sucesso, atendendo rigorosamente a todas as especificações do 
+
+PROMPT_MASTER_ORLANDO_PLANNER_ATUALIZADO.md
+, às orientações de priorização do núcleo de 
+
+RECOMENDACOES.txt
+ e ao design system de 
+
+DESIGN.md
+.
+
+1. Estrutura de Arquivos Criada
+text
+ROTEIRO - ORLANDO/
+├── index.html                                 # Documento HTML raiz com SEO, tipografia e ícones
+├── package.json                               # Configuração do projeto, scripts e dependências
+├── tsconfig.json                              # Configuração TypeScript em strict mode
+├── vite.config.ts                             # Configuração Vite com base relativa ('./') para GitHub Pages
+├── tailwind.config.js                         # Design tokens do sistema "Orlando Dispatch"
+├── postcss.config.js                          # Integração PostCSS + TailwindCSS
+├── README.md                                  # Documentação técnica e operacional completa
+├── .github/
+│   └── workflows/
+│       └── deploy.yml                         # Workflow GitHub Actions para CI/CD e Pages
+├── public/
+│   └── data/
+│       └── crowd-calendar.json                # Template público com registros nulos íntegros
+├── src/
+│   ├── main.ts                                # Controlador central da SPA e gerenciador de estado
+│   ├── styles/
+│   │   └── main.css                           # Estilos base, números tabulares e CSS para impressão (PDF)
+│   ├── types/
+│   │   ├── park.ts                            # Modelos de dados dos parques e complexos
+│   │   ├── ticket.ts                          # Contratos dos ingressos, regras e auditoria
+│   │   ├── itinerary.ts                       # Modelo dos 19 dias da viagem (05 a 23/05/2027)
+│   │   ├── crowd.ts                           # Separação hermética de apresentação e metadados admin
+│   │   ├── fatigue.ts                         # Modelos biomecânicos e parâmetros de tolerância
+│   │   └── optimizer.ts                       # Pesos e contratos de propostas de otimização
+│   ├── data/
+│   │   ├── parksCatalog.ts                    # Catálogo detalhado dos 10 parques temáticos
+│   │   ├── initialTickets.ts                  # Parâmetros dos 4 pacotes de ingressos
+│   │   ├── initialItinerary.ts                # Roteiro base inicial (19 dias)
+│   │   └── defaultCrowdData.ts                # Inicialização de dados nulos e dataset benchmark
+│   ├── services/
+│   │   ├── ticketValidator.ts                 # Motor de regras, capacidade, janelas e repetições
+│   │   ├── fatigueCalculator.ts               # Motor de fadiga, deslocamentos (Tampa) e descanso
+│   │   ├── comparatorService.ts               # Comparador de até 3 datas para o mesmo parque
+│   │   ├── itineraryOptimizer.ts              # Algoritmo de otimização com bloqueios protegidos
+│   │   ├── crowdDataService.ts                # Importador CSV/JSON com privacidade restrita
+│   │   ├── storageManager.ts                  # Persistência versionada (v1), desfazer/refazer e backup
+│   │   └── exportService.ts                   # Exportação em Markdown, backup JSON e impressão PDF
+│   ├── components/
+│   │   ├── Sidebar.ts                         # Barra lateral com navegação e gaveta mobile
+│   │   ├── Header.ts                          # Cabeçalho com indicador de salvamento e exportações
+│   │   ├── DashboardView.ts                   # Visão Geral: métricas, alertas e distribuição
+│   │   ├── CalendarView.ts                    # Meu Roteiro: 19 cards diários com travas e atalhos
+│   │   ├── CrowdView.ts                       # Calendário de Lotação: matriz 10 parques x 19 dias
+│   │   ├── ComparatorView.ts                  # Comparador lado a lado dos Melhores Dias
+│   │   ├── TicketsView.ts                     # Meus Ingressos: progresso de uso e auditoria
+│   │   ├── OptimizerView.ts                   # Sugestões de Roteiro com aceite/rejeição individual
+│   │   ├── FatigueView.ts                     # Desgaste Físico: km de caminhada e estresse acumulado
+│   │   ├── HistoryView.ts                     # Histórico: snapshots manuais e restauração
+│   │   ├── SettingsView.ts                    # Backup, restauração e módulo administrativo de auditoria
+│   │   ├── DayDetailsModal.ts                 # Modal de edição aprofundada de atrações e Rope Drop
+│   │   ├── SwapDaysModal.ts                   # Modal de inversão segura entre duas datas
+│   │   └── TicketRulesModal.ts                # Modal para configuração de regras de ingressos
+│   └── utils/
+│       └── dateUtils.ts                       # Manipulação temporal no fuso America/New_York
+└── tests/
+    ├── ticketValidator.test.ts                # 10 testes de ingressos e datas
+    ├── crowdAndPrivacy.test.ts                # 6 testes de privacidade e persistência
+    └── fatigueAndOptimizer.test.ts            # 6 testes de fadiga e otimização
+2. Funcionalidades Implementadas
+Visão Geral (Dashboard):
+
+4 cartões com indicadores em tempo real: Duração (19 dias), Dias em Parques (12 dias), Dias de Descanso/Compras (7 dias) e Auditoria de Ingressos (sinalizado como Pendente de confirmação).
+Tabela resumida com os primeiros dias e status de bloqueio.
+Distribuição estratégica por complexo: Walt Disney World (5 dias), Universal Orlando (4 dias), United Parks (3 dias) e Pausas (7 dias).
+Painel de pontos de atenção com alertas para a data fixa de 23/05, validade pendente, duas visitas ao Epic Universe e integridade da previsão de 2027.
+Meu Roteiro (Calendário Interativo):
+
+19 cartões completos cobrindo todo o período (05/05 a 23/05/2027).
+Botão para travar e destravar datas (dias bloqueados como 23/05 são protegidos contra remanejamento).
+Ação rápida de troca de datas (Swap) para inverter programações sem perda de visitas.
+Modal com inspetor completo para editar horários, Rope Drop, atrações prioritárias, pausas para refeição e notas pessoais.
+Calendário de Lotação (Crowd Matrix):
+
+Visualização matricial para os 10 parques nos 19 dias.
+Escala cromática padronizada: 1 a 3 verde (Lowest), 4 a 6 laranja (Average), 7 a 10 vermelho (Highest) e cinza para Dados de lotação não disponíveis.
+Princípio de Integridade: ausência de dados não verificados nunca é convertida em zero ou inventada.
+Regra Obrigatória de Privacidade Visual: total isolamento da interface pública de qualquer menção a fornecedores externos, links ou URLs de raspagem.
+Comparador de Melhores Dias:
+
+Permite selecionar qualquer parque temático e comparar até 3 datas da viagem lado a lado.
+Avalia índice de lotação, compatibilidade de janelas de ingressos, estresse muscular projetado, conflitos com o plano atual e emite parecer analítico explicável.
+Motor de Ingressos & Auditoria:
+
+Configurado para os 4 pacotes:
+Disney 4-Park Magic Pass: 4 parques distintos, 1 visita por parque, janela de 7 dias, status Pendente de confirmação.
+Magic Kingdom Avulso (23/05): Ingresso independente dedicado e bloqueado no encerramento (impossibilitado de consumir o passe Disney anterior).
+Universal Explorer / Multiday: 5 visitas (com até 2 entradas no Epic Universe e Volcano Bay), janela de 14 dias, status Pendente de confirmação.
+SeaWorld & Busch Gardens 2-Park Pass: 2 visitas, janela de 14 dias, status Pendente de confirmação.
+Emite status global como Pendente enquanto existirem hipóteses não confirmadas, impedindo falsas declarações de validade de 100%.
+Motor de Desgaste Físico (Fadiga):
+
+Pontuação dinâmica que pondera km de caminhada diária, tempo de estrada (com destaque para os ~150 min ida e volta até Busch Gardens em Tampa pela I-4 West), intensidade do parque e bônus de recuperação nos dias OFF.
+Emite alertas para dois dias seguidos de esforço Pesado ou 3+ dias consecutivos de parque.
+Controles interativos para ajuste da sensibilidade e tolerância do usuário.
+Motor de Otimização Explicável:
+
+Otimização ponderada editável pelo usuário (Lotação 40%, Fadiga 25%, Deslocamentos 15%, Preferências 10%, Flexibilidade 10%).
+Preservação obrigatória de datas travadas (05/05 Chegada e 23/05 Magic Kingdom).
+Sinaliza expressamente Otimização Parcial na ausência de dados oficiais de lotação de 2027.
+Comparador lado a lado com seleção individual (aceitar/rejeitar) para cada sugestão.
+Histórico, Backup e Exportação:
+
+Pilha de Desfazer/Refazer (Undo/Redo) com até 30 passos.
+Criação e restauração de snapshots manuais nomeados.
+Exportação para Markdown editorial e backup completo em formato JSON com esquema versionado (v1).
+Impressão otimizada via PDF com folha de estilos @media print.
+Módulo administrativo em Configurações para auditoria, upload de CSV/JSON e carregamento de dataset benchmark para simulação.
+3. Resultado dos Testes
+A suíte automatizada do Vitest cobriu todos os 18 cenários do Section 12 do Prompt Master:
+
+text
+✓ tests/ticketValidator.test.ts (10 tests)
+  - Datas consecutivas e fusos horários locais (America/New_York)
+  - Anos bissextos e viradas de calendário
+  - Janelas de validade dos ingressos
+  - Proibição de repetição de parques (Disney 4-Park)
+  - Detecção de dois parques no mesmo dia sem Hopper
+  - Isolamento obrigatório do Magic Kingdom em 23/05 com ingresso avulso
+  - Detecção de visitas não alocadas e capacidade máxima de bilhetes
+✓ tests/crowdAndPrivacy.test.ts (6 tests)
+  - Ausência de dados de lotação preserva nulo (nunca transforma em zero)
+  - Importação de dados inválidos, descarte de duplicatas e parques desconhecidos
+  - Ausência absoluta de nomes, marcas e URLs de terceiros no bundle e exportações públicas
+  - Suporte e validação de importação CSV
+  - Persistência com LocalStorage e pilha de histórico (Undo/Redo)
+✓ tests/fatigueAndOptimizer.test.ts (6 tests)
+  - Detecção de dias consecutivos de esforço pesado
+  - Detecção de deslocamento interestadual longo para Tampa Bay
+  - Bônus de recuperação em dias de descanso
+  - Preservação estrita das datas bloqueadas durante a otimização
+  - Sinalização de otimização parcial na falta de previsões
+  - Otimização completa assistida com benchmark simulado
+Test Files  3 passed (3)
+Tests       22 passed (22)
+Duration    1.93s
+A compilação de produção (npm run build) via TypeScript e Vite gerou os artefatos otimizados sem nenhum erro (dist/ pronto para publicação).
+
+4. Comandos para Executar Localmente
+No terminal da pasta do projeto:
+
+powershell
+# 1. Instalar dependências (já executado)
+npm install
+# 2. Executar em modo desenvolvimento
+npm run dev
+# 3. Executar os testes automatizados
+npm test
+# 4. Compilar para produção e pré-visualizar
+npm run build
+npm run preview
+5. Procedimento de Publicação no GitHub Pages
+Subir o repositório para o GitHub:
+powershell
+git init
+git add .
+git commit -m "feat: initial commit orlando planner"
+git branch -M main
+git remote add origin https://github.com/<SEU_USUARIO>/<SEU_REPOSITORIO>.git
+git push -u origin main
+Habilitar o GitHub Actions no repositório:
+Acesse o repositório no GitHub.
+Navegue até Settings > Pages.
+Na seção Build and deployment > Source, selecione GitHub Actions.
+Deploy Contínuo:
+O arquivo 
+
+.github/workflows/deploy.yml
+ já está configurado. A cada push na branch main, os testes do Vitest serão validados, a aplicação compilada e disponibilizada publicamente.
+A configuração base: './' no 
+
+vite.config.ts
+ garante compatibilidade completa em qualquer subdiretório do GitHub Pages.
+6. Pendências de Dados Externos
+Previsões Oficiais de Lotação para Maio de 2027:
+Os índices efetivos para a temporada de maio de 2027 ainda não foram divulgados pelas fontes de mercado.
+O planejador foi estruturado em conformidade estrita com o princípio da integridade: todos os índices permanecem nulos por padrão, sendo exibidos na interface pública como "Dados de lotação não disponíveis".
+Assim que os dados forem publicados, eles podem ser importados como CSV ou JSON no menu Configurações > Módulo Administrativo.
+Para fins de demonstração, o botão "Carregar Dados Benchmark de Simulação" na tela de configurações permite testar imediatamente o comportamento do otimizador completo.
+7. Regras de Ingressos que Precisam de Confirmação
+Para assegurar que o viajante não seja induzido a erro:
+
+Disney 4-Park Magic Pass:
+Janela adotada: 7 dias corridos entre a primeira visita (15/05) e a quarta (21/05).
+Status: Pendente de confirmação até a verificação do produto exato comercializado para 2027.
+Universal 3-Park Explorer / Epic Universe:
+Hipótese adotada: 5 visitas totais com direito a 2 entradas no Epic Universe e acesso ao Volcano Bay.
+Status: Pendente de confirmação, pois as políticas da Universal para reentrada no Epic Universe e inclusão de parques aquáticos em pacotes promocionais variam anualmente.
+United Parks (SeaWorld + Busch Gardens):
+Janela adotada: 14 dias corridos a partir do primeiro acesso.
+Status: Pendente de confirmação com a emissão do bilhete de 2 parques.

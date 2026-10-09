@@ -1,0 +1,122 @@
+[
+  {
+    "date": "2027-05-06",
+    "parkId": "seaworld",
+    "crowdLevel": null,
+    "isRecommended": false,
+    "isBusyDay": false,
+    "season": "Média",
+    "status": "unavailable",
+    "lastUpdated": null
+  },
+  {
+    "date": "2027-05-07",
+    "parkId": "universal-studios",
+    "crowdLevel": null,
+    "isRecommended": false,
+    "isBusyDay": false,
+    "season": "Média",
+    "status": "unavailable",
+    "lastUpdated": null
+  },
+  {
+    "date": "2027-05-09",
+    "parkId": "busch-gardens",
+    "crowdLevel": null,
+    "isRecommended": false,
+    "isBusyDay": false,
+    "season": "Média",
+    "status": "unavailable",
+    "lastUpdated": null
+  },
+  {
+    "date": "2027-05-10",
+    "parkId": "volcano-bay",
+    "crowdLevel": null,
+    "isRecommended": false,
+    "isBusyDay": false,
+    "season": "Média",
+    "status": "unavailable",
+    "lastUpdated": null
+  },
+  {
+    "date": "2027-05-11",
+    "parkId": "epic-universe",
+    "crowdLevel": null,
+    "isRecommended": false,
+    "isBusyDay": false,
+    "season": "Média",
+    "status": "unavailable",
+    "lastUpdated": null
+  },
+  {
+    "date": "2027-05-13",
+    "parkId": "islands-of-adventure",
+    "crowdLevel": null,
+    "isRecommended": false,
+    "isBusyDay": false,
+    "season": "Média",
+    "status": "unavailable",
+    "lastUpdated": null
+  },
+  {
+    "date": "2027-05-15",
+    "parkId": "animal-kingdom",
+    "crowdLevel": null,
+    "isRecommended": false,
+    "isBusyDay": false,
+    "season": "Média",
+    "status": "unavailable",
+    "lastUpdated": null
+  },
+  {
+    "date": "2027-05-16",
+    "parkId": "hollywood-studios",
+    "crowdLevel": null,
+    "isRecommended": false,
+    "isBusyDay": false,
+    "season": "Média",
+    "status": "unavailable",
+    "lastUpdated": null
+  },
+  {
+    "date": "2027-05-18",
+    "parkId": "epcot",
+    "crowdLevel": null,
+    "isRecommended": false,
+    "isBusyDay": false,
+    "season": "Média",
+    "status": "unavailable",
+    "lastUpdated": null
+  },
+  {
+    "date": "2027-05-19",
+    "parkId": "epic-universe",
+    "crowdLevel": null,
+    "isRecommended": false,
+    "isBusyDay": false,
+    "season": "Média",
+    "status": "unavailable",
+    "lastUpdated": null
+  },
+  {
+    "date": "2027-05-21",
+    "parkId": "magic-kingdom",
+    "crowdLevel": null,
+    "isRecommended": false,
+    "isBusyDay": false,
+    "season": "Média",
+    "status": "unavailable",
+    "lastUpdated": null
+  },
+  {
+    "date": "2027-05-23",
+    "parkId": "magic-kingdom",
+    "crowdLevel": null,
+    "isRecommended": false,
+    "isBusyDay": false,
+    "season": "Média",
+    "status": "unavailable",
+    "lastUpdated": null
+  }
+]

@@ -1,0 +1,447 @@
+{
+  "schema_version": "1.0.0",
+  "project": "ORLANDO PLANNER",
+  "feature": "Onde Comer",
+  "generated_on": "2026-10-08",
+  "scope": {
+    "travel_period": {
+      "start": "2027-05-05",
+      "end": "2027-05-23"
+    },
+    "locale": "pt-BR",
+    "currency": "USD"
+  },
+  "feature_flags": {
+    "where_to_eat_enabled": true,
+    "search_enabled": true,
+    "filters_enabled": true,
+    "favorites_enabled": true,
+    "add_to_itinerary_enabled": true,
+    "show_editorial_sources": true,
+    "show_unverified_operational_data_as_confirmed": false,
+    "show_closed_restaurants_in_recommendations": false
+  },
+  "source_catalog": [
+    {
+      "titulo": "Comida - índice principal",
+      "url": "https://www.vaipradisney.com/blog/comida/",
+      "tipo": "indice",
+      "estabelecimentos": "",
+      "status": "descoberto_nao_validado",
+      "origem": "catalogo_anterior",
+      "catalog_approval": "approved_by_user",
+      "source_validation": "not_independently_verified"
+    },
+    {
+      "titulo": "Comida - arquivo",
+      "url": "https://www.vaipradisney.com/blog/categoria/comida/",
+      "tipo": "categoria",
+      "estabelecimentos": "",
+      "status": "descoberto_nao_validado",
+      "origem": "catalogo_anterior",
+      "catalog_approval": "approved_by_user",
+      "source_validation": "not_independently_verified"
+    },
+    {
+      "titulo": "Onde Comer nos Parques",
+      "url": "https://www.vaipradisney.com/blog/categoria/comida/onde-comer-nos-parques/",
+      "tipo": "categoria",
+      "estabelecimentos": "",
+      "status": "descoberto_nao_validado",
+      "origem": "catalogo_anterior",
+      "catalog_approval": "approved_by_user",
+      "source_validation": "not_independently_verified"
+    },
+    {
+      "titulo": "Recomendação de restaurantes",
+      "url": "https://www.vaipradisney.com/blog/categoria/comida/recomendacao-de-restaurantes/",
+      "tipo": "categoria",
+      "estabelecimentos": "",
+      "status": "descoberto_nao_validado",
+      "origem": "catalogo_anterior",
+      "catalog_approval": "approved_by_user",
+      "source_validation": "not_independently_verified"
+    },
+    {
+      "titulo": "Onde comer no Universal Studios?",
+      "url": "https://www.vaipradisney.com/blog/onde-comer-universal-studios/",
+      "tipo": "guia_parque",
+      "estabelecimentos": "",
+      "status": "descoberto_nao_validado",
+      "origem": "catalogo_anterior",
+      "catalog_approval": "approved_by_user",
+      "source_validation": "not_independently_verified"
+    },
+    {
+      "titulo": "Onde comer no Islands of Adventure?",
+      "url": "https://www.vaipradisney.com/blog/onde-comer-islands-of-adventure/",
+      "tipo": "guia_parque",
+      "estabelecimentos": "",
+      "status": "descoberto_nao_validado",
+      "origem": "catalogo_anterior",
+      "catalog_approval": "approved_by_user",
+      "source_validation": "not_independently_verified"
+    },
+    {
+      "titulo": "Comendo com personagens da Disney",
+      "url": "https://www.vaipradisney.com/blog/comendo-com-personagens-da-disney/",
+      "tipo": "personagens",
+      "estabelecimentos": "",
+      "status": "descoberto_nao_validado",
+      "origem": "catalogo_anterior",
+      "catalog_approval": "approved_by_user",
+      "source_validation": "not_independently_verified"
+    },
+    {
+      "titulo": "Comidas na Disney: além do hambúrguer gastando pouco",
+      "url": "https://www.vaipradisney.com/blog/comidas-disney-alem-do-hamburguer/",
+      "tipo": "economia",
+      "estabelecimentos": "",
+      "status": "descoberto_nao_validado",
+      "origem": "catalogo_anterior",
+      "catalog_approval": "approved_by_user",
+      "source_validation": "not_independently_verified"
+    },
+    {
+      "titulo": "Comida - paginação 6",
+      "url": "https://www.vaipradisney.com/blog/comida/page/6/",
+      "tipo": "paginacao",
+      "estabelecimentos": "",
+      "status": "descoberto_nao_validado",
+      "origem": "catalogo_anterior",
+      "catalog_approval": "approved_by_user",
+      "source_validation": "not_independently_verified"
+    },
+    {
+      "titulo": "Comida - paginação 8",
+      "url": "https://www.vaipradisney.com/blog/comida/page/8/",
+      "tipo": "paginacao",
+      "estabelecimentos": "",
+      "status": "descoberto_nao_validado",
+      "origem": "catalogo_anterior",
+      "catalog_approval": "approved_by_user",
+      "source_validation": "not_independently_verified"
+    },
+    {
+      "titulo": "Receitas de Orlando: sopa de tomate do Earl of Sandwich",
+      "url": "https://www.vaipradisney.com/blog/receitas-orlando-sopa-de-tomate-earl-of-sandwich/",
+      "tipo": "receita",
+      "estabelecimentos": "Earl of Sandwich",
+      "status": "referencia_editorial; nao comprova cardapio",
+      "origem": "links_usuario",
+      "catalog_approval": "approved_by_user",
+      "source_validation": "not_independently_verified"
+    },
+    {
+      "titulo": "Perkins: comer bem e barato em Orlando",
+      "url": "https://www.vaipradisney.com/blog/perkins-comer-bem-barato-orlando/",
+      "tipo": "avaliacao_restaurante",
+      "estabelecimentos": "Perkins",
+      "status": "aguardando verificacao oficial de unidades",
+      "origem": "links_usuario",
+      "catalog_approval": "approved_by_user",
+      "source_validation": "not_independently_verified"
+    },
+    {
+      "titulo": "Ana’s Kitchen: comida caseira brasileira em Orlando",
+      "url": "https://www.vaipradisney.com/blog/anas-kitchen-restaurante-brasileiro-orlando/",
+      "tipo": "avaliacao_restaurante",
+      "estabelecimentos": "Ana's Kitchen",
+      "status": "fechado_permanentemente_setembro_2025",
+      "origem": "links_usuario",
+      "catalog_approval": "approved_by_user",
+      "source_validation": "closure_reported_by_source"
+    },
+    {
+      "titulo": "Panera Bread: comida boa e barata para qualquer momento",
+      "url": "https://www.vaipradisney.com/blog/panera-bread/",
+      "tipo": "avaliacao_restaurante",
+      "estabelecimentos": "Panera Bread",
+      "status": "aguardando verificacao oficial de unidades",
+      "origem": "links_usuario",
+      "catalog_approval": "approved_by_user",
+      "source_validation": "not_independently_verified"
+    },
+    {
+      "titulo": "Olive Garden: comendo bem e barato em Orlando",
+      "url": "https://www.vaipradisney.com/blog/olive-garden-comer-bem-barato-orlando/",
+      "tipo": "avaliacao_restaurante",
+      "estabelecimentos": "Olive Garden",
+      "status": "aguardando verificacao oficial de unidades",
+      "origem": "links_usuario",
+      "catalog_approval": "approved_by_user",
+      "source_validation": "not_independently_verified"
+    },
+    {
+      "titulo": "Five Guys: para os apaixonados por cheeseburger",
+      "url": "https://www.vaipradisney.com/blog/five-guys-apaixonados-por-cheeseburger/",
+      "tipo": "avaliacao_restaurante",
+      "estabelecimentos": "Five Guys",
+      "status": "aguardando verificacao oficial de unidades",
+      "origem": "links_usuario",
+      "catalog_approval": "approved_by_user",
+      "source_validation": "not_independently_verified"
+    },
+    {
+      "titulo": "Panda Express: comida chinesa barata e deliciosa",
+      "url": "https://www.vaipradisney.com/blog/panda-express-comida-chinesa-barata-deliciosa/",
+      "tipo": "avaliacao_restaurante",
+      "estabelecimentos": "Panda Express",
+      "status": "aguardando verificacao oficial de unidades",
+      "origem": "links_usuario",
+      "catalog_approval": "approved_by_user",
+      "source_validation": "not_independently_verified"
+    },
+    {
+      "titulo": "5 pizzas que valem a pena em Orlando e região",
+      "url": "https://www.vaipradisney.com/blog/5-pizzas-que-valem-pena-em-orlando-regiao/",
+      "tipo": "guia_multiplos_estabelecimentos",
+      "estabelecimentos": "Pizza Bruno; Via Napoli; Prato; Camelo; Blaze Pizza",
+      "status": "aguardando verificacao individual",
+      "origem": "links_usuario",
+      "catalog_approval": "approved_by_user",
+      "source_validation": "not_independently_verified"
+    },
+    {
+      "titulo": "Chick-fil-A — localizador oficial",
+      "url": "https://www.chick-fil-a.com/locations/browse/fl",
+      "tipo": "rede_fonte_oficial",
+      "estabelecimentos": "Chick-fil-A",
+      "status": "unidades_listadas_em_fonte_oficial; confirmar funcionamento antes da viagem",
+      "origem": "pedido_usuario",
+      "catalog_approval": "approved_by_user",
+      "source_validation": "not_independently_verified"
+    }
+  ],
+  "restaurants": [
+    {
+      "id": "food-001",
+      "name": "Earl of Sandwich",
+      "visibility": "active",
+      "catalog_approval": "approved_by_user",
+      "operational_verification": "not_independently_verified",
+      "source_urls": [
+        "https://www.vaipradisney.com/blog/receitas-orlando-sopa-de-tomate-earl-of-sandwich/"
+      ],
+      "locations": [],
+      "price_range": null,
+      "hours": null,
+      "reservation_url": null,
+      "notes": null
+    },
+    {
+      "id": "food-002",
+      "name": "Perkins",
+      "visibility": "active",
+      "catalog_approval": "approved_by_user",
+      "operational_verification": "not_independently_verified",
+      "source_urls": [
+        "https://www.vaipradisney.com/blog/perkins-comer-bem-barato-orlando/"
+      ],
+      "locations": [],
+      "price_range": null,
+      "hours": null,
+      "reservation_url": null,
+      "notes": null
+    },
+    {
+      "id": "food-003",
+      "name": "Ana's Kitchen",
+      "visibility": "historical_only",
+      "catalog_approval": "approved_by_user",
+      "operational_verification": "reported_closed_2025_09",
+      "source_urls": [
+        "https://www.vaipradisney.com/blog/anas-kitchen-restaurante-brasileiro-orlando/"
+      ],
+      "locations": [],
+      "price_range": null,
+      "hours": null,
+      "reservation_url": null,
+      "notes": "Encerramento reportado em setembro de 2025; não sugerir no roteiro."
+    },
+    {
+      "id": "food-004",
+      "name": "Panera Bread",
+      "visibility": "active",
+      "catalog_approval": "approved_by_user",
+      "operational_verification": "not_independently_verified",
+      "source_urls": [
+        "https://www.vaipradisney.com/blog/panera-bread/"
+      ],
+      "locations": [],
+      "price_range": null,
+      "hours": null,
+      "reservation_url": null,
+      "notes": null
+    },
+    {
+      "id": "food-005",
+      "name": "Olive Garden",
+      "visibility": "active",
+      "catalog_approval": "approved_by_user",
+      "operational_verification": "not_independently_verified",
+      "source_urls": [
+        "https://www.vaipradisney.com/blog/olive-garden-comer-bem-barato-orlando/"
+      ],
+      "locations": [],
+      "price_range": null,
+      "hours": null,
+      "reservation_url": null,
+      "notes": null
+    },
+    {
+      "id": "food-006",
+      "name": "Five Guys",
+      "visibility": "active",
+      "catalog_approval": "approved_by_user",
+      "operational_verification": "not_independently_verified",
+      "source_urls": [
+        "https://www.vaipradisney.com/blog/five-guys-apaixonados-por-cheeseburger/"
+      ],
+      "locations": [],
+      "price_range": null,
+      "hours": null,
+      "reservation_url": null,
+      "notes": null
+    },
+    {
+      "id": "food-007",
+      "name": "Panda Express",
+      "visibility": "active",
+      "catalog_approval": "approved_by_user",
+      "operational_verification": "not_independently_verified",
+      "source_urls": [
+        "https://www.vaipradisney.com/blog/panda-express-comida-chinesa-barata-deliciosa/"
+      ],
+      "locations": [],
+      "price_range": null,
+      "hours": null,
+      "reservation_url": null,
+      "notes": null
+    },
+    {
+      "id": "food-008",
+      "name": "Pizza Bruno",
+      "visibility": "active",
+      "catalog_approval": "approved_by_user",
+      "operational_verification": "not_independently_verified",
+      "source_urls": [
+        "https://www.vaipradisney.com/blog/5-pizzas-que-valem-pena-em-orlando-regiao/"
+      ],
+      "locations": [],
+      "price_range": null,
+      "hours": null,
+      "reservation_url": null,
+      "notes": null
+    },
+    {
+      "id": "food-009",
+      "name": "Via Napoli",
+      "visibility": "active",
+      "catalog_approval": "approved_by_user",
+      "operational_verification": "not_independently_verified",
+      "source_urls": [
+        "https://www.vaipradisney.com/blog/5-pizzas-que-valem-pena-em-orlando-regiao/"
+      ],
+      "locations": [],
+      "price_range": null,
+      "hours": null,
+      "reservation_url": null,
+      "notes": null
+    },
+    {
+      "id": "food-010",
+      "name": "Prato",
+      "visibility": "active",
+      "catalog_approval": "approved_by_user",
+      "operational_verification": "not_independently_verified",
+      "source_urls": [
+        "https://www.vaipradisney.com/blog/5-pizzas-que-valem-pena-em-orlando-regiao/"
+      ],
+      "locations": [],
+      "price_range": null,
+      "hours": null,
+      "reservation_url": null,
+      "notes": null
+    },
+    {
+      "id": "food-011",
+      "name": "Camelo",
+      "visibility": "active",
+      "catalog_approval": "approved_by_user",
+      "operational_verification": "not_independently_verified",
+      "source_urls": [
+        "https://www.vaipradisney.com/blog/5-pizzas-que-valem-pena-em-orlando-regiao/"
+      ],
+      "locations": [],
+      "price_range": null,
+      "hours": null,
+      "reservation_url": null,
+      "notes": null
+    },
+    {
+      "id": "food-012",
+      "name": "Blaze Pizza",
+      "visibility": "active",
+      "catalog_approval": "approved_by_user",
+      "operational_verification": "not_independently_verified",
+      "source_urls": [
+        "https://www.vaipradisney.com/blog/5-pizzas-que-valem-pena-em-orlando-regiao/"
+      ],
+      "locations": [],
+      "price_range": null,
+      "hours": null,
+      "reservation_url": null,
+      "notes": null
+    },
+    {
+      "id": "food-013",
+      "name": "Chick-fil-A",
+      "visibility": "active",
+      "catalog_approval": "approved_by_user",
+      "operational_verification": "not_independently_verified",
+      "source_urls": [
+        "https://www.chick-fil-a.com/locations/browse/fl"
+      ],
+      "locations": [],
+      "price_range": null,
+      "hours": null,
+      "reservation_url": null,
+      "notes": null
+    }
+  ],
+  "integration_contract": {
+    "menu_label": "Onde Comer",
+    "route_suggestion": "/onde-comer",
+    "itinerary_actions": [
+      "add_breakfast",
+      "add_lunch",
+      "add_dinner",
+      "add_snack",
+      "remove_meal"
+    ],
+    "never_overwrite": [
+      "trip_dates",
+      "park_schedule",
+      "user_notes",
+      "favorites",
+      "existing_reservations"
+    ],
+    "require_user_confirmation_before_modifying_itinerary": true
+  },
+  "display_rules": {
+    "restaurant_catalog_is_user_approved": true,
+    "approval_is_not_operational_verification": true,
+    "unknown_price_or_hours": "omit_and_label_as_not_confirmed",
+    "closed_restaurants": "historical_only",
+    "recipes": "editorial_reference_only",
+    "article_indexes": "discovery_sources_not_restaurants",
+    "chain_locations": "do_not_invent_addresses_or_branches"
+  },
+  "implementation_status": "configuration_ready_not_deployed",
+  "limitations": [
+    "Dados do CSV anterior preservados; artigos não foram integralmente extraídos nesta etapa.",
+    "Sem acesso ao repositório do aplicativo, a interface não foi implementada.",
+    "Horários, preços, cardápios, unidades e reservas não estão confirmados para maio de 2027."
+  ]
+}
