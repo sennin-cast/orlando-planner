@@ -13,6 +13,9 @@ describe('Orlando Planner — Segurança e Auditoria de Credenciais', () => {
   const targetEmail2 = ['paolaameixoeira', 'gmail.com'].join('@');
   const targetPass2 = ['!!antonia', '123'].join('@');
 
+  const targetEmail3 = ['sennincast', 'gmail.com'].join('@');
+  const targetPass3 = ['!!esd', '123'].join('@');
+
   beforeEach(() => {
     auth = new AuthService();
     auth.resetStateForTesting();
@@ -51,10 +54,12 @@ describe('Orlando Planner — Segurança e Auditoria de Credenciais', () => {
       // Verifica ausência de e-mails em texto claro
       expect(content).not.toContain(targetEmail1);
       expect(content).not.toContain(targetEmail2);
+      expect(content).not.toContain(targetEmail3);
 
       // Verifica ausência de senhas em texto claro
       expect(content).not.toContain(targetPass1);
       expect(content).not.toContain(targetPass2);
+      expect(content).not.toContain(targetPass3);
     }
   });
 
@@ -68,8 +73,10 @@ describe('Orlando Planner — Segurança e Auditoria de Credenciais', () => {
         const content = fs.readFileSync(path.join(distAssetsDir, file), 'utf-8');
         expect(content).not.toContain(targetEmail1);
         expect(content).not.toContain(targetEmail2);
+        expect(content).not.toContain(targetEmail3);
         expect(content).not.toContain(targetPass1);
         expect(content).not.toContain(targetPass2);
+        expect(content).not.toContain(targetPass3);
       }
     }
   });
@@ -90,6 +97,15 @@ describe('Orlando Planner — Segurança e Auditoria de Credenciais', () => {
     expect(result.user?.name).toBe('Paola');
     expect(auth.isAuthenticated()).toBe(true);
     expect(auth.getCurrentUser()?.name).toBe('Paola');
+  });
+
+  it('autenticação: usuário 3 (Esdras) autentica com sucesso através de derivação PBKDF2 e decriptografia AES-GCM', async () => {
+    const result = await auth.login(targetEmail3, targetPass3, false);
+    expect(result.success).toBe(true);
+    expect(result.user).toBeDefined();
+    expect(result.user?.name).toBe('Esdras');
+    expect(auth.isAuthenticated()).toBe(true);
+    expect(auth.getCurrentUser()?.name).toBe('Esdras');
   });
 
   it('normalização: e-mail em maiúsculas com espaços deve autenticar perfeitamente', async () => {

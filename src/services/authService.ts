@@ -41,6 +41,14 @@ const ENCRYPTED_VAULT_RECORDS: EncryptedUserRecord[] = [
     ciphertext: '802b5e0fe5f8fa212a7effda797ea02ca62ffdab9a3d6ffe19c5cfcde5995b168cd5b136dd3e8151611038a47d5cf356a3ae02beb9c6ebbaa80344494fb06c47ed53b3150060521ef18e2bbe960ffcc1d8',
     iterations: 120000,
   },
+  {
+    id: 'usr_ef8546d56de7',
+    lookupHash: '94ac20b2c595e9de26a9b07ee7f84a868414487035e9c612b208afe550cc485f',
+    salt: '962f24cc76b0b6243850336b46f8fcda',
+    iv: 'a1d0ce8ab483c9cf729e370a',
+    ciphertext: '61f34aa4eca5cd5f939598117e356284e8b6f6feec174c58d48141a1a6a7401c3f8344081e8122fb8a2a34c7952f1496a44aea3ed3ca5e6b534336d0dd44734ff522a2fec342b6ea4470212933',
+    iterations: 120000,
+  },
 ];
 
 const PEPPER = 'orlando-planner-salt-v1:';
