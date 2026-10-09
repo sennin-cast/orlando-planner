@@ -5,12 +5,13 @@ import { ItineraryFatigueSummary } from '../types/fatigue';
 import { PARKS_CATALOG } from '../data/parksCatalog';
 import { CrowdDataService } from '../services/crowdDataService';
 import { diningService } from '../services/diningService';
+import { formatDateBr } from '../utils/dateUtils';
 
 export function renderCalendarView(
   itinerary: ItineraryDay[],
   tickets: TicketDefinition[],
   crowdStore: CrowdDataStore,
-  fatigue: ItineraryFatigueSummary,
+  _fatigue: ItineraryFatigueSummary,
   filterType: 'all' | 'parks' | 'rest' = 'all'
 ): string {
   const ticketMap = new Map<string, TicketDefinition>();
@@ -27,10 +28,8 @@ export function renderCalendarView(
       const parkInfo = day.parkId ? PARKS_CATALOG[day.parkId] : null;
       const crowdRecord = day.parkId ? crowdStore.records[`${day.date}_${day.parkId}`] : null;
       const crowdStyle = CrowdDataService.getCrowdBadgeStyle(crowdRecord?.crowdLevel ?? null);
-      const dayFatigue = fatigue.dailyResults[day.date];
       const ticket = day.ticketId ? ticketMap.get(day.ticketId) : null;
       const dayMeals = diningService.getMealsForDate(day.date);
-      const dayNum = day.date.split('-')[2];
 
       // Border and header color based on activity
       let accentBorder = 'border-l-4 border-l-outline-variant';
@@ -50,18 +49,15 @@ export function renderCalendarView(
         }
       }
 
-      // Effort badge styling
-      let effortClass = 'bg-surface-container text-outline';
-      if (day.effortLevel === 'Pesado') effortClass = 'bg-[#ffdad6] text-[#93000a] font-medium';
-      else if (day.effortLevel === 'Médio') effortClass = 'bg-[#ffdeaa] text-[#5f4100] font-medium';
-      else if (day.effortLevel === 'Leve') effortClass = 'bg-[#9af5c2] text-[#005233] font-medium';
+      const hasCrowdData = crowdRecord && crowdRecord.crowdLevel !== null && crowdRecord.crowdLevel !== undefined;
+      const crowdLabelText = hasCrowdData ? `Lotação: ${crowdRecord.crowdLevel}/10` : 'Lotação não disponível';
 
       return `
         <div class="bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-outline-variant/30 flex flex-col justify-between gap-3 hover:border-outline-variant transition-all ${accentBorder}" data-date="${day.date}">
           <!-- Top Row: Date, Day, Lock -->
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <span class="font-headline-sm text-[16px] font-bold text-on-surface">${day.dayOfWeek}, ${dayNum}/05</span>
+              <span class="font-headline-sm text-[16px] font-bold text-on-surface">${day.dayOfWeek}, ${formatDateBr(day.date)}</span>
               <span class="text-[11px] px-1.5 py-0.5 rounded ${tagBg} font-medium">
                 ${parkInfo ? parkInfo.shortName : day.activityType === 'shopping' ? 'Compras' : day.activityType === 'arrival' ? 'Chegada' : day.activityType === 'departure' ? 'Partida' : 'Descanso'}
               </span>
@@ -89,19 +85,19 @@ export function renderCalendarView(
             </p>
           </div>
 
-          <!-- Indicators Grid: Lotação, Fadiga, Ingresso -->
+          <!-- Indicators Grid: Lotação & Ritmo da Programação -->
           <div class="grid grid-cols-2 gap-1.5 pt-1 text-[11px]">
             <!-- Crowd Tag -->
-            <div class="px-2 py-1 rounded ${crowdStyle.bgClass} ${crowdStyle.textClass} border ${crowdStyle.borderClass} font-medium flex items-center justify-between truncate" title="${crowdStyle.label}">
-              <span class="truncate">${crowdRecord?.crowdLevel !== null ? `Lotação: ${crowdRecord?.crowdLevel}/10` : 'Lotação N/D'}</span>
+            <div class="px-2 py-1 rounded ${hasCrowdData ? crowdStyle.bgClass : 'bg-surface-container-low'} ${hasCrowdData ? crowdStyle.textClass : 'text-outline'} border ${hasCrowdData ? crowdStyle.borderClass : 'border-outline-variant/20'} font-medium flex items-center justify-between truncate" title="${hasCrowdData ? crowdStyle.label : 'Sem previsão de parque para este dia'}">
+              <span class="truncate">${crowdLabelText}</span>
               ${crowdRecord?.isRecommended ? '<span class="material-symbols-outlined text-[13px] text-[#27865b]">thumb_up</span>' : ''}
               ${crowdRecord?.isBusyDay ? '<span class="material-symbols-outlined text-[13px] text-[#c44b4b]">warning</span>' : ''}
             </div>
 
-            <!-- Effort / Fatigue Tag -->
-            <div class="px-2 py-1 rounded ${effortClass} font-medium flex items-center justify-between">
-              <span>Esforço: ${day.effortLevel}</span>
-              <span class="text-[10px] text-outline">${dayFatigue ? dayFatigue.level : 'Leve'}</span>
+            <!-- Pace / Activity Tag -->
+            <div class="px-2 py-1 rounded bg-surface-container-low text-on-surface-variant border border-outline-variant/20 font-medium flex items-center justify-between">
+              <span class="truncate">${day.activityType === 'park' ? 'Parque' : day.activityType === 'shopping' ? 'Compras' : day.activityType === 'arrival' ? 'Chegada' : day.activityType === 'departure' ? 'Partida' : 'Descanso'}</span>
+              <span class="text-[10px] text-outline font-semibold">${day.activityType === 'park' ? day.effortLevel : 'Off-Park'}</span>
             </div>
           </div>
 
@@ -167,17 +163,29 @@ export function renderCalendarView(
           </p>
         </div>
 
-        <!-- Filter buttons -->
-        <div class="flex items-center gap-1 bg-surface-container-low p-1 rounded-xl border border-outline-variant/30">
-          <button class="btn-cal-filter px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${filterType === 'all' ? 'bg-surface-container-lowest text-primary shadow-xs' : 'text-on-surface-variant hover:text-on-surface'}" data-filter="all">
-            Todos (${itinerary.length})
+        <!-- Action and Filter buttons -->
+        <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+          <button 
+            id="btn-trigger-optimize-trip" 
+            class="px-3.5 py-1.5 rounded-xl bg-primary text-on-primary hover:bg-primary-container font-semibold text-xs flex items-center gap-1.5 shadow-sm transition-all"
+            type="button"
+            title="Otimizar distribuição inteligente com base na lotação dos parques e restrições"
+          >
+            <span class="material-symbols-outlined text-[17px]">auto_fix_high</span>
+            <span>Otimizar Minha Viagem</span>
           </button>
-          <button class="btn-cal-filter px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${filterType === 'parks' ? 'bg-surface-container-lowest text-primary shadow-xs' : 'text-on-surface-variant hover:text-on-surface'}" data-filter="parks">
-            Parques (${itinerary.filter((d) => d.activityType === 'park').length})
-          </button>
-          <button class="btn-cal-filter px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${filterType === 'rest' ? 'bg-surface-container-lowest text-primary shadow-xs' : 'text-on-surface-variant hover:text-on-surface'}" data-filter="rest">
-            Descanso/Compras (${itinerary.filter((d) => d.activityType !== 'park').length})
-          </button>
+
+          <div class="flex items-center gap-1 bg-surface-container-low p-1 rounded-xl border border-outline-variant/30">
+            <button class="btn-cal-filter px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${filterType === 'all' ? 'bg-surface-container-lowest text-primary shadow-xs' : 'text-on-surface-variant hover:text-on-surface'}" data-filter="all">
+              Todos (${itinerary.length})
+            </button>
+            <button class="btn-cal-filter px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${filterType === 'parks' ? 'bg-surface-container-lowest text-primary shadow-xs' : 'text-on-surface-variant hover:text-on-surface'}" data-filter="parks">
+              Parques (${itinerary.filter((d) => d.activityType === 'park').length})
+            </button>
+            <button class="btn-cal-filter px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${filterType === 'rest' ? 'bg-surface-container-lowest text-primary shadow-xs' : 'text-on-surface-variant hover:text-on-surface'}" data-filter="rest">
+              Descanso/Compras (${itinerary.filter((d) => d.activityType !== 'park').length})
+            </button>
+          </div>
         </div>
       </section>
 

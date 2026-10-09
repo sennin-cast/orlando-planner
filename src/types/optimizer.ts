@@ -1,11 +1,26 @@
 import { ItineraryDay } from './itinerary';
 
+export interface OptimizerPreferences {
+  preferDisneyFirstPark: boolean;
+  preserveLockedDates: boolean;
+  preserveDiningReservations: boolean;
+  allowReorderOffDays: boolean;
+}
+
+export const DEFAULT_OPTIMIZER_PREFERENCES: OptimizerPreferences = {
+  preferDisneyFirstPark: true,
+  preserveLockedDates: true,
+  preserveDiningReservations: true,
+  allowReorderOffDays: true,
+};
+
+// Legacy interface retained for backward compatibility with existing storage or imports
 export interface OptimizerWeights {
-  crowdWeight: number; // default: 0.40
-  fatigueWeight: number; // default: 0.25
-  commuteWeight: number; // default: 0.15
-  preferenceWeight: number; // default: 0.10
-  flexibilityWeight: number; // default: 0.10
+  crowdWeight: number;
+  fatigueWeight: number;
+  commuteWeight: number;
+  preferenceWeight: number;
+  flexibilityWeight: number;
 }
 
 export interface ItineraryChangeSuggestion {
@@ -21,16 +36,34 @@ export interface ItineraryChangeSuggestion {
   accepted: boolean;
 }
 
+export interface DayExplanation {
+  date: string;
+  parkOrActivity: string;
+  previousParkOrActivity: string;
+  changed: boolean;
+  crowdLevel: number | null;
+  previousCrowdLevel: number | null;
+  reason: string;
+  isFirstPark?: boolean;
+  isLocked?: boolean;
+}
+
 export interface OptimizationResult {
   currentScore: number;
   suggestedScore: number;
-  isPartialOptimization: boolean; // True if crowd forecast is unavailable or partially verified
+  isPartialOptimization: boolean;
   partialOptimizationNote?: string;
   suggestions: ItineraryChangeSuggestion[];
   proposedItinerary: ItineraryDay[];
+  explanations?: DayExplanation[];
+  conflicts?: string[];
   summary: {
     crowdImprovementPercent: number | null;
     fatigueImprovementPercent: number;
     resolvedConflicts: number;
+    firstParkName?: string;
+    firstParkReason?: string;
+    lockedDaysPreserved?: number;
+    restDaysCount?: number;
   };
 }

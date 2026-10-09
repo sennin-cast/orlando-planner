@@ -8,7 +8,6 @@ export type AppTab =
   | 'comparar-datas'
   | 'meus-ingressos'
   | 'sugestoes-de-roteiro'
-  | 'desgaste-fisico'
   | 'historico'
   | 'configuracoes';
 
@@ -17,6 +16,7 @@ export interface NavItem {
   label: string;
   icon: string;
   badge?: string;
+  adminOnly?: boolean;
 }
 
 export const NAV_ITEMS: NavItem[] = [
@@ -29,13 +29,19 @@ export const NAV_ITEMS: NavItem[] = [
   { id: 'comparar-datas', label: 'Comparar Datas', icon: 'compare_arrows' },
   { id: 'meus-ingressos', label: 'Meus Ingressos', icon: 'confirmation_number' },
   { id: 'sugestoes-de-roteiro', label: 'Sugestões de Roteiro', icon: 'alt_route' },
-  { id: 'desgaste-fisico', label: 'Desgaste Físico', icon: 'directions_walk' },
-  { id: 'historico', label: 'Histórico', icon: 'history' },
-  { id: 'configuracoes', label: 'Configurações', icon: 'settings' },
+  { id: 'historico', label: 'Histórico', icon: 'history', adminOnly: true },
+  { id: 'configuracoes', label: 'Configurações', icon: 'settings', adminOnly: true },
 ];
 
-export function renderSidebar(currentTab: AppTab, tripDays: number, userName?: string): string {
-  const navHtml = NAV_ITEMS.map((item) => {
+export function renderSidebar(
+  currentTab: AppTab,
+  tripDays: number,
+  userName?: string,
+  isAdmin: boolean = false
+): string {
+  const visibleItems = NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin);
+
+  const navHtml = visibleItems.map((item) => {
     const isActive = item.id === currentTab;
     const activeClass = isActive
       ? 'bg-surface-container text-primary font-semibold shadow-xs'

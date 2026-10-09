@@ -7,7 +7,9 @@
 export interface AuthenticatedUser {
   name: string;
   email: string;
-  role: string;
+  role: 'admin' | 'viajante';
+  lookupHash: string;
+  signature: string;
   sessionId: string;
   loginTime: number;
   expiresAt: number;
@@ -50,6 +52,24 @@ const ENCRYPTED_VAULT_RECORDS: EncryptedUserRecord[] = [
     iterations: 120000,
   },
 ];
+
+// Hashes de busca cega autorizados exclusivamente para áreas de Histórico e Configurações
+export const AUTHORIZED_ADMIN_LOOKUP_HASHES = new Set<string>([
+  'a1a0bcf457f22d00d62e10076a690a6644864b234b79a91360c1c8b61fb2d4ac', // thiago
+  '94ac20b2c595e9de26a9b07ee7f84a868414487035e9c612b208afe550cc485f', // esdras / sennincast
+]);
+
+const SIG_PEPPER = 'orlando-sig-v1:';
+
+function computeSessionSignature(sessionId: string, lookupHash: string, expiresAt: number): string {
+  const input = `${sessionId}:${lookupHash}:${expiresAt}:${SIG_PEPPER}`;
+  let hash = 0;
+  for (let i = 0; i < input.length; i++) {
+    hash = ((hash << 5) - hash) + input.charCodeAt(i);
+    hash |= 0;
+  }
+  return 'sig_' + Math.abs(hash).toString(16);
+}
 
 const PEPPER = 'orlando-planner-salt-v1:';
 const SESSION_STORAGE_KEY = 'orlando_planner_session_v1';
@@ -282,7 +302,7 @@ export class AuthService {
     }
 
     // 3. Verifica resultado
-    if (!decryptedProfile) {
+    if (!decryptedProfile || !matchedRecord) {
       this.currentUser = null;
       this.recordFailedAttempt();
       const attemptsLeft = this.getRemainingAttempts();
@@ -303,13 +323,19 @@ export class AuthService {
 
     const sessionId = bufToHex(getRandomBytes(16));
     const now = Date.now();
+    const expiresAt = now + SESSION_TTL_MS;
+    const isAdminUser = AUTHORIZED_ADMIN_LOOKUP_HASHES.has(matchedRecord.lookupHash);
+    const signature = computeSessionSignature(sessionId, matchedRecord.lookupHash, expiresAt);
+
     const user: AuthenticatedUser = {
       name: decryptedProfile.name,
       email: decryptedProfile.email,
-      role: 'viajante',
+      role: isAdminUser ? 'admin' : 'viajante',
+      lookupHash: matchedRecord.lookupHash,
+      signature,
       sessionId,
       loginTime: now,
-      expiresAt: now + SESSION_TTL_MS,
+      expiresAt,
     };
 
     this.currentUser = user;
@@ -340,6 +366,22 @@ export class AuthService {
     return this.currentUser;
   }
 
+  public isAdmin(): boolean {
+    if (!this.isAuthenticated() || !this.currentUser) return false;
+    return (
+      this.currentUser.role === 'admin' &&
+      AUTHORIZED_ADMIN_LOOKUP_HASHES.has(this.currentUser.lookupHash)
+    );
+  }
+
+  public canAccessTab(tab: string): boolean {
+    if (tab === 'desgaste-fisico') return false;
+    if (tab === 'historico' || tab === 'configuracoes') {
+      return this.isAdmin();
+    }
+    return true;
+  }
+
   // --- Gerenciamento de Sessão ---
 
   private saveSession(user: AuthenticatedUser, rememberMe: boolean): void {
@@ -352,8 +394,21 @@ export class AuthService {
       const raw = safeGetItem(SESSION_STORAGE_KEY, false) || safeGetItem(SESSION_STORAGE_KEY, true);
       if (raw) {
         const parsed: AuthenticatedUser = JSON.parse(raw);
-        if (parsed && parsed.sessionId && parsed.expiresAt && Date.now() < parsed.expiresAt) {
-          this.currentUser = parsed;
+        if (
+          parsed &&
+          parsed.sessionId &&
+          parsed.lookupHash &&
+          parsed.signature &&
+          parsed.expiresAt &&
+          Date.now() < parsed.expiresAt
+        ) {
+          const expectedSig = computeSessionSignature(parsed.sessionId, parsed.lookupHash, parsed.expiresAt);
+          if (parsed.signature === expectedSig) {
+            this.currentUser = parsed;
+          } else {
+            // Assinatura inválida: potencial adulteração no armazenamento
+            this.logout();
+          }
         } else {
           this.logout();
         }

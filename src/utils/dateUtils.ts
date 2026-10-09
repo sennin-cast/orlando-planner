@@ -24,6 +24,11 @@ export function parseDateParts(dateStr: string): DateParts {
   return { year, month, day };
 }
 
+export function parseDateIso(dateStr: string): Date {
+  const { year, month, day } = parseDateParts(dateStr);
+  return new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+}
+
 export function isLeapYear(year: number): boolean {
   return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
 }
@@ -99,9 +104,49 @@ export function formatDateBr(dateStr: string): string {
   return `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}`;
 }
 
+export function formatDateShortBr(dateStr: string): string {
+  return formatDateBr(dateStr);
+}
+
+export function formatDateCompleteBr(dateStr: string): string {
+  const { year, month, day } = parseDateParts(dateStr);
+  return `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
+}
+
+export function formatDateWithWeekdayPt(dateStr: string): string {
+  const dayName = getDayOfWeekPt(dateStr);
+  return `${dayName}, ${formatDateBr(dateStr)}`;
+}
+
+export function formatDateWithWeekdayParenPt(dateStr: string): string {
+  const dayName = getDayOfWeekPt(dateStr);
+  return `${formatDateBr(dateStr)} (${dayName})`;
+}
+
+export function formatDateRangePt(startDateStr: string, endDateStr: string): string {
+  const start = parseDateParts(startDateStr);
+  const end = parseDateParts(endDateStr);
+  if (start.year === end.year) {
+    return `${String(start.day).padStart(2, '0')}/${String(start.month).padStart(2, '0')} a ${String(end.day).padStart(2, '0')}/${String(end.month).padStart(2, '0')}/${end.year}`;
+  }
+  return `${formatDateCompleteBr(startDateStr)} a ${formatDateCompleteBr(endDateStr)}`;
+}
+
+export function formatTimeBr(timeStr: string): string {
+  if (!timeStr) return '';
+  const parts = timeStr.trim().split(':');
+  if (parts.length >= 2) {
+    const hh = parts[0].padStart(2, '0');
+    const mm = parts[1].padStart(2, '0');
+    return `${hh}:${mm}`;
+  }
+  return timeStr;
+}
+
 export function formatFullDatePt(dateStr: string): string {
   const { year, month, day } = parseDateParts(dateStr);
   const dayName = getDayOfWeekPt(dateStr);
   const monthName = MONTH_NAMES_PT[month - 1];
-  return `${dayName}, ${day} de ${monthName} de ${year}`;
+  return `${dayName}, ${String(day).padStart(2, '0')} de ${monthName} de ${year}`;
 }
+

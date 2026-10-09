@@ -4,7 +4,7 @@ import { ItineraryDay } from './types/itinerary';
 import { TicketDefinition } from './types/ticket';
 import { CrowdDataStore } from './types/crowd';
 import { FatigueParameters, ItineraryFatigueSummary } from './types/fatigue';
-import { OptimizerWeights, OptimizationResult } from './types/optimizer';
+import { OptimizerWeights, OptimizationResult, OptimizerPreferences, DEFAULT_OPTIMIZER_PREFERENCES } from './types/optimizer';
 
 import { storageManager, StorageSnapshot, DEFAULT_FATIGUE_PARAMS, DEFAULT_OPTIMIZER_WEIGHTS } from './services/storageManager';
 import { validateTickets } from './services/ticketValidator';
@@ -26,7 +26,6 @@ import { renderCrowdView, CrowdSubTab } from './components/CrowdView';
 import { renderComparatorView } from './components/ComparatorView';
 import { renderTicketsView } from './components/TicketsView';
 import { renderOptimizerView } from './components/OptimizerView';
-import { renderFatigueView } from './components/FatigueView';
 import { renderHistoryView } from './components/HistoryView';
 import { renderSettingsView } from './components/SettingsView';
 import { renderOutletsView } from './components/OutletsView';
@@ -39,6 +38,7 @@ import { renderTicketRulesModal } from './components/TicketRulesModal';
 import { renderTripGeneratorModal } from './components/TripGeneratorModal';
 import { renderRestaurantDetailsModal } from './components/RestaurantDetailsModal';
 import { renderAddMealModal } from './components/AddMealModal';
+import { renderOptimizePreferencesModal, renderOptimizePreviewModal } from './components/OptimizeTripModal';
 import { DiningFilterCriteria, MealType } from './types/dining';
 import { diningService } from './services/diningService';
 import { authService } from './services/authService';
@@ -51,6 +51,8 @@ class OrlandoPlannerApp {
   private crowdStore: CrowdDataStore;
   private fatigueParams: FatigueParameters = { ...DEFAULT_FATIGUE_PARAMS };
   private optimizerWeights: OptimizerWeights = { ...DEFAULT_OPTIMIZER_WEIGHTS };
+  private optimizerPreferences: OptimizerPreferences = { ...DEFAULT_OPTIMIZER_PREFERENCES };
+  private previewOptimizationResult: OptimizationResult | null = null;
   private snapshots: StorageSnapshot[] = [];
 
   // Filter & Sub-state
@@ -93,6 +95,8 @@ class OrlandoPlannerApp {
     | 'trip-generator'
     | 'restaurant-details'
     | 'add-meal'
+    | 'optimize-preferences'
+    | 'optimize-preview'
     | null = null;
   private modalSelectedDate: string | null = null;
   private modalSelectedTicketId: string | null = null;
@@ -130,7 +134,7 @@ class OrlandoPlannerApp {
       this.itinerary,
       this.tickets,
       this.crowdStore,
-      this.optimizerWeights
+      this.optimizerPreferences
     );
   }
 
@@ -156,6 +160,10 @@ class OrlandoPlannerApp {
     const canUndo = storageManager.canUndo();
     const canRedo = storageManager.canRedo();
     const tripDays = this.itinerary.length;
+
+    if (!authService.canAccessTab(this.currentTab)) {
+      this.currentTab = 'visao-geral';
+    }
 
     let viewHtml = '';
     switch (this.currentTab) {
@@ -185,7 +193,8 @@ class OrlandoPlannerApp {
           this.selectedLiveParkId,
           this.liveWaitData,
           this.selectedCrowdMonth,
-          tripDates
+          tripDates,
+          this.itinerary
         );
         break;
       }
@@ -201,14 +210,14 @@ class OrlandoPlannerApp {
       case 'sugestoes-de-roteiro':
         viewHtml = renderOptimizerView(this.optimizationResult, this.optimizerWeights);
         break;
-      case 'desgaste-fisico':
-        viewHtml = renderFatigueView(this.itinerary, this.fatigueResult, this.fatigueParams);
-        break;
       case 'historico':
         viewHtml = renderHistoryView(this.snapshots, canUndo, canRedo);
         break;
       case 'configuracoes':
         viewHtml = renderSettingsView(this.crowdStore);
+        break;
+      default:
+        viewHtml = renderDashboardView(this.itinerary, this.validationResult, this.fatigueResult);
         break;
     }
 
@@ -235,6 +244,10 @@ class OrlandoPlannerApp {
         this.modalSelectedMealDay || undefined,
         this.modalSelectedMealType
       );
+    } else if (this.activeModal === 'optimize-preferences') {
+      modalHtml = renderOptimizePreferencesModal(this.optimizerPreferences);
+    } else if (this.activeModal === 'optimize-preview' && this.previewOptimizationResult) {
+      modalHtml = renderOptimizePreviewModal(this.itinerary, this.previewOptimizationResult);
     }
 
     const currentUser = authService.getCurrentUser();
@@ -242,7 +255,7 @@ class OrlandoPlannerApp {
 
     appEl.innerHTML = `
       <div class="min-h-screen bg-surface flex flex-col">
-        ${renderSidebar(this.currentTab, tripDays, userName)}
+        ${renderSidebar(this.currentTab, tripDays, userName, authService.isAdmin())}
         <div class="lg:pl-[230px] flex flex-col flex-1">
           ${renderHeader(canUndo, canRedo, tripDays, {
             onUndo: () => this.handleUndo(),
@@ -253,7 +266,7 @@ class OrlandoPlannerApp {
             onOpenTripGenerator: () => this.openTripGeneratorModal(),
             onLogout: () => this.handleLogout(),
           }, userName)}
-          <main class="w-full pt-[68px] min-h-screen px-4 sm:px-6 lg:px-space-xl py-6 lg:py-space-xl max-w-7xl">
+          <main class="w-full pt-20 pb-16 min-h-screen px-4 sm:px-6 lg:px-space-xl max-w-7xl">
             ${viewHtml}
           </main>
         </div>
@@ -290,6 +303,9 @@ class OrlandoPlannerApp {
       btn.addEventListener('click', (e) => {
         const target = (e.currentTarget as HTMLElement).getAttribute('data-tab') as AppTab;
         if (target) {
+          if (!authService.canAccessTab(target)) {
+            return;
+          }
           this.currentTab = target;
           this.closeMobileSidebar();
           this.render();
@@ -387,6 +403,11 @@ class OrlandoPlannerApp {
     });
 
     // 5. Calendar View actions
+    document.getElementById('btn-trigger-optimize-trip')?.addEventListener('click', () => {
+      this.activeModal = 'optimize-preferences';
+      this.render();
+    });
+
     document.querySelectorAll('.btn-cal-filter').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         this.calFilter = (e.currentTarget as HTMLElement).getAttribute('data-filter') as any;
@@ -495,6 +516,24 @@ class OrlandoPlannerApp {
           this.render();
         }
       });
+    });
+
+    document.getElementById('btn-crowd-view-grid')?.addEventListener('click', () => {
+      document.getElementById('crowd-month-grid-container')?.classList.remove('hidden');
+      document.getElementById('crowd-month-list-container')?.classList.add('hidden');
+      document.getElementById('btn-crowd-view-grid')?.classList.add('bg-surface-container-lowest', 'text-primary', 'shadow-xs');
+      document.getElementById('btn-crowd-view-grid')?.classList.remove('text-on-surface-variant');
+      document.getElementById('btn-crowd-view-list')?.classList.remove('bg-surface-container-lowest', 'text-primary', 'shadow-xs');
+      document.getElementById('btn-crowd-view-list')?.classList.add('text-on-surface-variant');
+    });
+
+    document.getElementById('btn-crowd-view-list')?.addEventListener('click', () => {
+      document.getElementById('crowd-month-grid-container')?.classList.add('hidden');
+      document.getElementById('crowd-month-list-container')?.classList.remove('hidden');
+      document.getElementById('btn-crowd-view-list')?.classList.add('bg-surface-container-lowest', 'text-primary', 'shadow-xs');
+      document.getElementById('btn-crowd-view-list')?.classList.remove('text-on-surface-variant');
+      document.getElementById('btn-crowd-view-grid')?.classList.remove('bg-surface-container-lowest', 'text-primary', 'shadow-xs');
+      document.getElementById('btn-crowd-view-grid')?.classList.add('text-on-surface-variant');
     });
 
     // Touring Plans actions
@@ -749,6 +788,53 @@ class OrlandoPlannerApp {
     document.getElementById('btn-cancel-ticket-modal')?.addEventListener('click', () => this.closeModal());
     document.getElementById('btn-close-trip-gen-modal')?.addEventListener('click', () => this.closeModal());
     document.getElementById('btn-cancel-trip-gen')?.addEventListener('click', () => this.closeModal());
+    document.getElementById('btn-close-optimize-modal')?.addEventListener('click', () => this.closeModal());
+    document.getElementById('btn-cancel-optimize')?.addEventListener('click', () => this.closeModal());
+    document.getElementById('btn-close-preview-modal')?.addEventListener('click', () => this.closeModal());
+    document.getElementById('btn-cancel-preview')?.addEventListener('click', () => this.closeModal());
+
+    document.getElementById('btn-back-to-preferences')?.addEventListener('click', () => {
+      this.activeModal = 'optimize-preferences';
+      this.render();
+    });
+
+    const formOpt = document.getElementById('form-optimize-preferences') as HTMLFormElement | null;
+    if (formOpt) {
+      formOpt.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const preferDisney = (document.getElementById('opt-prefer-disney-first') as HTMLInputElement)?.checked ?? true;
+        const preserveLocked = (document.getElementById('opt-preserve-locked') as HTMLInputElement)?.checked ?? true;
+        const preserveDining = (document.getElementById('opt-preserve-dining') as HTMLInputElement)?.checked ?? true;
+        const reorderOff = (document.getElementById('opt-reorder-off-days') as HTMLInputElement)?.checked ?? true;
+
+        this.optimizerPreferences = {
+          preferDisneyFirstPark: preferDisney,
+          preserveLockedDates: preserveLocked,
+          preserveDiningReservations: preserveDining,
+          allowReorderOffDays: reorderOff,
+        };
+
+        this.previewOptimizationResult = ItineraryOptimizer.optimize(
+          this.itinerary,
+          this.tickets,
+          this.crowdStore,
+          this.optimizerPreferences
+        );
+
+        this.activeModal = 'optimize-preview';
+        this.render();
+      });
+    }
+
+    document.getElementById('btn-confirm-apply-suggestions')?.addEventListener('click', () => {
+      if (this.previewOptimizationResult) {
+        this.itinerary = JSON.parse(JSON.stringify(this.previewOptimizationResult.proposedItinerary));
+        this.saveCurrentState(true);
+        this.closeModal();
+        this.render();
+        alert('Roteiro otimizado com sucesso com base na lotação dos parques e restrições obrigatórias!');
+      }
+    });
 
     // Open Touring Plan from Day Details Modal
     document.querySelectorAll('.btn-open-park-plan').forEach((btn) => {

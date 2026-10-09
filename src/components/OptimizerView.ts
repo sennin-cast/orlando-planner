@@ -1,8 +1,9 @@
 import { OptimizationResult, OptimizerWeights } from '../types/optimizer';
+import { formatDateBr } from '../utils/dateUtils';
 
 export function renderOptimizerView(
   optimization: OptimizationResult,
-  weights: OptimizerWeights
+  _weights?: OptimizerWeights
 ): string {
   const suggestionsHtml = optimization.suggestions
     .map((s, index) => {
@@ -14,9 +15,9 @@ export function renderOptimizerView(
             </span>
             <div class="flex flex-col min-w-0">
               <div class="flex items-center gap-2 flex-wrap">
-                <span class="font-bold text-sm text-on-surface">${s.sourceDate.substring(5)}: ${s.sourceParkOrActivity}</span>
+                <span class="font-bold text-sm text-on-surface">${formatDateBr(s.sourceDate)}: ${s.sourceParkOrActivity}</span>
                 <span class="material-symbols-outlined text-[16px] text-primary">swap_horiz</span>
-                <span class="font-bold text-sm text-on-surface">${s.targetDate.substring(5)}: ${s.targetParkOrActivity}</span>
+                <span class="font-bold text-sm text-on-surface">${formatDateBr(s.targetDate)}: ${s.targetParkOrActivity}</span>
               </div>
               <p class="text-xs text-on-surface-variant mt-1 leading-relaxed">
                 ${s.justification}
@@ -52,7 +53,7 @@ export function renderOptimizerView(
         <div>
           <h1 class="font-display-title text-display-title text-on-surface tracking-tight">Sugestões de Roteiro</h1>
           <p class="font-body-md text-body-md text-on-surface-variant">
-            Motor de otimização analítica: balanceamento de esforço físico, cadência de descanso e restrições obrigatórias.
+            Motor determinístico de redistribuição: priorização por lotação real, respeito estrito às regras de ingressos e cadência inteligente de descanso.
           </p>
         </div>
 
@@ -98,44 +99,60 @@ export function renderOptimizerView(
         </div>
 
         <div class="bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-outline-variant/30 text-center">
-          <span class="text-xs uppercase text-outline font-semibold">Redução de Fadiga</span>
+          <span class="text-xs uppercase text-outline font-semibold">Descanso & Equilíbrio</span>
           <div class="font-headline-lg text-2xl font-bold text-tertiary-container mt-1">
-            -${optimization.summary.fatigueImprovementPercent} pts
+            ${optimization.summary.restDaysCount || 0} dias
           </div>
-          <span class="text-[11px] text-outline mt-0.5 block">Melhoria física cumulativa</span>
+          <span class="text-[11px] text-outline mt-0.5 block">Compras e pausas programadas</span>
         </div>
       </section>
 
-      <!-- Optimizer Weights Config Slider Collapsible -->
-      <section class="bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-outline-variant/30">
-        <div class="flex items-center justify-between cursor-pointer" id="btn-toggle-weights-panel">
-          <div class="flex items-center gap-2">
-            <span class="material-symbols-outlined text-outline text-[18px]">tune</span>
-            <span class="text-xs font-semibold uppercase text-outline">Pesos e Critérios do Algoritmo</span>
-          </div>
-          <span class="text-xs text-primary font-medium">Ajustar Pesos</span>
+      <!-- Deterministic Rule Hierarchy Info Card (No Sliders / No Percent Modes) -->
+      <section class="bg-surface-container-lowest rounded-xl p-5 shadow-sm border border-outline-variant/30">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="material-symbols-outlined text-primary text-[20px]">account_tree</span>
+          <h2 class="text-xs font-bold uppercase tracking-wider text-outline">Critérios Hierárquicos do Motor de Decisão</h2>
         </div>
 
-        <div id="weights-panel" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 pt-4 mt-2 border-t border-outline-variant/20">
-          <div>
-            <label class="block text-xs text-on-surface font-medium mb-1">Lotação: <span id="val-w-crowd" class="font-bold text-primary">${Math.round(weights.crowdWeight * 100)}%</span></label>
-            <input type="range" class="weight-slider w-full" id="slider-w-crowd" min="0" max="100" value="${weights.crowdWeight * 100}">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+          <div class="p-3 rounded-lg bg-surface-container-low border border-outline-variant/20 flex items-start gap-2.5">
+            <span class="w-5 h-5 rounded-full bg-primary/20 text-primary font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5">1</span>
+            <div>
+              <strong class="font-semibold text-on-surface block">Restrições Obrigatórias</strong>
+              <p class="text-[11px] text-outline mt-0.5 leading-relaxed">
+                Chegada e partida sem parques intensos, cumprimento rígido das validades de ingressos e bloqueio absoluto de datas fixas.
+              </p>
+            </div>
           </div>
-          <div>
-            <label class="block text-xs text-on-surface font-medium mb-1">Fadiga: <span id="val-w-fatigue" class="font-bold text-primary">${Math.round(weights.fatigueWeight * 100)}%</span></label>
-            <input type="range" class="weight-slider w-full" id="slider-w-fatigue" min="0" max="100" value="${weights.fatigueWeight * 100}">
+
+          <div class="p-3 rounded-lg bg-surface-container-low border border-outline-variant/20 flex items-start gap-2.5">
+            <span class="w-5 h-5 rounded-full bg-primary/20 text-primary font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5">2</span>
+            <div>
+              <strong class="font-semibold text-on-surface block">Menor Lotação Confiável</strong>
+              <p class="text-[11px] text-outline mt-0.5 leading-relaxed">
+                Minimização global do índice de multidão e filas para os parques selecionados na viagem inteira.
+              </p>
+            </div>
           </div>
-          <div>
-            <label class="block text-xs text-on-surface font-medium mb-1">Deslocamentos: <span id="val-w-commute" class="font-bold text-primary">${Math.round(weights.commuteWeight * 100)}%</span></label>
-            <input type="range" class="weight-slider w-full" id="slider-w-commute" min="0" max="100" value="${weights.commuteWeight * 100}">
+
+          <div class="p-3 rounded-lg bg-surface-container-low border border-outline-variant/20 flex items-start gap-2.5">
+            <span class="w-5 h-5 rounded-full bg-primary/20 text-primary font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5">3</span>
+            <div>
+              <strong class="font-semibold text-on-surface block">Primeiro Parque Disney Acolhedor</strong>
+              <p class="text-[11px] text-outline mt-0.5 leading-relaxed">
+                Prioriza iniciar o roteiro em um parque Disney com lotação relativamente tranquila e ritmo adequado ao viajante.
+              </p>
+            </div>
           </div>
-          <div>
-            <label class="block text-xs text-on-surface font-medium mb-1">Preferências: <span id="val-w-pref" class="font-bold text-primary">${Math.round(weights.preferenceWeight * 100)}%</span></label>
-            <input type="range" class="weight-slider w-full" id="slider-w-pref" min="0" max="100" value="${weights.preferenceWeight * 100}">
-          </div>
-          <div>
-            <label class="block text-xs text-on-surface font-medium mb-1">Flexibilidade: <span id="val-w-flex" class="font-bold text-primary">${Math.round(weights.flexibilityWeight * 100)}%</span></label>
-            <input type="range" class="weight-slider w-full" id="slider-w-flex" min="0" max="100" value="${weights.flexibilityWeight * 100}">
+
+          <div class="p-3 rounded-lg bg-surface-container-low border border-outline-variant/20 flex items-start gap-2.5">
+            <span class="w-5 h-5 rounded-full bg-primary/20 text-primary font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5">4</span>
+            <div>
+              <strong class="font-semibold text-on-surface block">Preservação de Descanso e Compras</strong>
+              <p class="text-[11px] text-outline mt-0.5 leading-relaxed">
+                Evita sequências longas de parques sem pausa, reduzindo desgaste de deslocamentos longos (como Tampa).
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -166,7 +183,7 @@ export function renderOptimizerView(
             <span class="material-symbols-outlined text-4xl mb-2 text-tertiary-container">verified</span>
             <h3 class="font-semibold text-on-surface text-base">Roteiro Atual Já Otimizado</h3>
             <p class="text-xs text-outline mt-1 max-w-md mx-auto">
-              O itinerário atual atende com excelência ao equilíbrio de desgaste físico, intercalação de compras e respeito obrigatório às datas travadas.
+              O itinerário atual atende com excelência ao equilíbrio de menor lotação, primeiro parque Disney, intercalação de compras e respeito obrigatório às datas travadas.
             </p>
           </div>
         `

@@ -1,10 +1,9 @@
 import { ItineraryDay } from '../types/itinerary';
 import { TicketDefinition } from '../types/ticket';
 import { CrowdDataStore } from '../types/crowd';
-import { FatigueCalculator } from './fatigueCalculator';
 import { PARKS_CATALOG } from '../data/parksCatalog';
 import { OUTLETS_CATALOG } from '../data/outletsCatalog';
-import { formatFullDatePt } from '../utils/dateUtils';
+import { formatFullDatePt, formatDateBr, formatDateRangePt } from '../utils/dateUtils';
 
 export class ExportService {
   public static generateMarkdownItinerary(
@@ -12,40 +11,35 @@ export class ExportService {
     tickets: TicketDefinition[],
     crowdStore: CrowdDataStore
   ): string {
-    const fatigue = FatigueCalculator.calculate(itinerary);
     const ticketMap = new Map<string, TicketDefinition>();
     tickets.forEach((t) => ticketMap.set(t.id, t));
 
-    const startDate = itinerary[0]?.date || '2027-05-05';
+    const startDate = itinerary[0]?.date || '2027-05-01';
     const endDate = itinerary[itinerary.length - 1]?.date || '2027-05-23';
 
-    let md = `# ORLANDO PLANNER — Roteiro de Viagem\n`;
-    md += `**Período:** ${startDate.substring(5)} a ${endDate.substring(5)} (${itinerary.length} dias)\n`;
+    let md = `# ORLANDO PLANNER — Roteiro Oficial de Viagem\n`;
+    md += `**Período:** ${formatDateRangePt(startDate, endDate)} (${itinerary.length} dias)\n`;
     md += `**Gerado em:** ${new Date().toLocaleDateString('pt-BR')}\n\n`;
 
     md += `## Resumo Geral\n`;
     const parkDaysCount = itinerary.filter((d) => d.activityType === 'park').length;
     const restDaysCount = itinerary.filter((d) => d.activityType !== 'park').length;
     md += `- **Dias com Parques:** ${parkDaysCount} dias\n`;
-    md += `- **Dias de Descanso / Compras:** ${restDaysCount} dias\n`;
-    md += `- **Índice Médio de Fadiga:** ${fatigue.overallFatigueScore}/100\n`;
-    md += `- **Alertas Físicos:** ${fatigue.criticalAlerts.length > 0 ? fatigue.criticalAlerts.join('; ') : 'Nenhum alerta crítico'}\n\n`;
+    md += `- **Dias de Descanso / Compras:** ${restDaysCount} dias\n\n`;
 
     md += `## Programação Diária Detalhada\n\n`;
-    md += `| Data | Dia | Atividade / Parque | Esforço | Lotação Prevista | Fadiga | Ingresso |\n`;
-    md += `|---|---|---|---|---|---|---|\n`;
+    md += `| Data | Dia | Atividade / Parque | Lotação Prevista | Ingresso |\n`;
+    md += `|---|---|---|---|---|\n`;
 
     itinerary.forEach((day) => {
       const crowdRecord = day.parkId ? crowdStore.records[`${day.date}_${day.parkId}`] : null;
-      const crowdText = crowdRecord && crowdRecord.crowdLevel !== null ? `${crowdRecord.crowdLevel}/10` : 'Não disponível';
-      const dayFatigue = fatigue.dailyResults[day.date];
-      const fatigueText = dayFatigue ? dayFatigue.level : 'Leve';
+      const crowdText = crowdRecord && crowdRecord.crowdLevel !== null ? `${crowdRecord.crowdLevel}/10` : (day.activityType === 'park' ? 'Lotação não disponível' : 'Dia Off-Park');
       const ticket = day.ticketId ? ticketMap.get(day.ticketId) : null;
       const ticketText = ticket ? ticket.name : (day.activityType === 'park' ? 'Sem ingresso' : '—');
 
       const title = day.isLocked ? `🔒 ${day.title}` : day.title;
 
-      md += `| ${day.date.substring(5)} | ${day.dayOfWeek} | ${title} | ${day.effortLevel} | ${crowdText} | ${fatigueText} | ${ticketText} |\n`;
+      md += `| ${formatDateBr(day.date)} | ${day.dayOfWeek} | ${title} | ${crowdText} | ${ticketText} |\n`;
     });
 
     md += `\n---\n\n`;
@@ -114,7 +108,6 @@ export class ExportService {
   ): void {
     if (typeof window === 'undefined') return;
 
-    const fatigue = FatigueCalculator.calculate(itinerary);
     const ticketMap = new Map<string, TicketDefinition>();
     tickets.forEach((t) => ticketMap.set(t.id, t));
 
@@ -127,13 +120,13 @@ export class ExportService {
     const tableRows = itinerary
       .map((day) => {
         const crowdRecord = day.parkId ? crowdStore.records[`${day.date}_${day.parkId}`] : null;
-        const crowdText = crowdRecord && crowdRecord.crowdLevel !== null ? `${crowdRecord.crowdLevel}/10` : 'N/D';
+        const crowdText = crowdRecord && crowdRecord.crowdLevel !== null ? `${crowdRecord.crowdLevel}/10` : (day.activityType === 'park' ? 'Lotação não disponível' : 'Dia Off-Park');
         const ticket = day.ticketId ? ticketMap.get(day.ticketId) : null;
         const ticketText = ticket ? ticket.name : (day.activityType === 'park' ? 'Sem ingresso' : '—');
 
         return `
           <tr>
-            <td style="padding: 6px 8px; border: 1px solid #d1d5db; font-weight: bold; white-space: nowrap;">${day.date.substring(5)} (${day.dayOfWeek})</td>
+            <td style="padding: 6px 8px; border: 1px solid #d1d5db; font-weight: bold; white-space: nowrap;">${formatDateBr(day.date)} (${day.dayOfWeek})</td>
             <td style="padding: 6px 8px; border: 1px solid #d1d5db; font-weight: 600;">${day.isLocked ? '🔒 ' : ''}${day.title}</td>
             <td style="padding: 6px 8px; border: 1px solid #d1d5db; text-align: center;">${day.effortLevel}</td>
             <td style="padding: 6px 8px; border: 1px solid #d1d5db; text-align: center;">${crowdText}</td>
@@ -147,12 +140,12 @@ export class ExportService {
       .map((day) => {
         const parkInfo = day.parkId ? PARKS_CATALOG[day.parkId] : null;
         return `
-          <div style="margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px dashed #e5e7eb; page-break-inside: avoid;">
+          <div style="margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px dashed #e5e7eb; page-break-inside: avoid; break-inside: avoid;">
             <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
               <h4 style="margin: 0; font-size: 14px; font-weight: bold; color: #004b89;">
                 Dia ${day.dayNumber} • ${formatFullDatePt(day.date)}: ${day.title}
               </h4>
-              <span style="font-size: 11px; font-weight: bold; color: #4b5563;">${day.effortLevel}</span>
+              <span style="font-size: 11px; font-weight: bold; color: #4b5563;">${day.activityType === 'park' ? 'Parque Temático' : 'Descanso / Compras'}</span>
             </div>
             <p style="margin: 2px 0 6px 0; font-size: 12px; color: #374151;">${day.description}</p>
             ${parkInfo ? `
@@ -170,7 +163,7 @@ export class ExportService {
 
     const outletsDetails = OUTLETS_CATALOG
       .map((store) => `
-        <div style="margin-bottom: 10px; padding: 8px 10px; border: 1px solid #e5e7eb; border-radius: 6px; page-break-inside: avoid;">
+        <div style="margin-bottom: 10px; padding: 8px 10px; border: 1px solid #e5e7eb; border-radius: 6px; page-break-inside: avoid; break-inside: avoid;">
           <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 12px; color: #111827;">
             <span>${store.name}</span>
             <span style="color: #059669;">Preço: ${store.priceLevel}</span>
@@ -193,20 +186,23 @@ export class ExportService {
       <html lang="pt-BR">
       <head>
         <meta charset="utf-8">
-        <title>ORLANDO PLANNER — Roteiro de Viagem</title>
+        <title>ORLANDO PLANNER — Roteiro Oficial de Viagem</title>
         <style>
           body { font-family: 'Helvetica Neue', Arial, sans-serif; margin: 24px; color: #111827; line-height: 1.4; font-size: 12px; }
           h1 { margin: 0 0 4px 0; font-size: 22px; color: #004b89; }
-          h2 { margin: 18px 0 8px 0; font-size: 16px; color: #1f2937; border-bottom: 2px solid #004b89; padding-bottom: 4px; }
-          h3 { margin: 14px 0 6px 0; font-size: 14px; }
+          h2 { margin: 18px 0 8px 0; font-size: 16px; color: #1f2937; border-bottom: 2px solid #004b89; padding-bottom: 4px; page-break-after: avoid; break-after: avoid; }
+          h3, h4 { margin: 14px 0 6px 0; font-size: 14px; page-break-after: avoid; break-after: avoid; }
           table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 11.5px; }
+          thead { display: table-header-group; }
+          tr, td, th { page-break-inside: avoid; break-inside: avoid; }
           .kpi-box { display: flex; gap: 12px; margin: 12px 0 18px 0; }
           .kpi { flex: 1; padding: 10px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; text-align: center; }
           .kpi-val { font-size: 18px; font-weight: bold; color: #004b89; margin-top: 2px; }
-          .page-break { page-break-before: always; }
+          .page-break { page-break-before: always; break-before: always; }
           @media print {
             body { margin: 12mm 15mm; }
             .no-print { display: none !important; }
+            table, tr, td, th { page-break-inside: avoid; break-inside: avoid; }
           }
         </style>
       </head>
@@ -214,10 +210,10 @@ export class ExportService {
         <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #004b89; padding-bottom: 8px;">
           <div>
             <h1>ORLANDO PLANNER</h1>
-            <div style="font-size: 13px; font-weight: 600; color: #4b5563;">Roteiro Inteligente & Planejamento de Parques e Compras</div>
+            <div style="font-size: 13px; font-weight: 600; color: #4b5563;">Roteiro Inteligente & Planejamento Oficial de Parques</div>
           </div>
           <div style="text-align: right; font-size: 11px; color: #6b7280;">
-            <div><strong>Período:</strong> ${startDate.substring(5)} a ${endDate.substring(5)} (${itinerary.length} dias)</div>
+            <div><strong>Período:</strong> ${formatDateRangePt(startDate, endDate)} (${itinerary.length} dias)</div>
             <div>Impresso em: ${new Date().toLocaleDateString('pt-BR')}</div>
           </div>
         </div>
@@ -236,8 +232,8 @@ export class ExportService {
             <div class="kpi-val">${restDaysCount} dias</div>
           </div>
           <div class="kpi">
-            <div style="font-size: 11px; color: #6b7280; text-transform: uppercase;">Índice Médio de Fadiga</div>
-            <div class="kpi-val">${fatigue.overallFatigueScore}/100</div>
+            <div style="font-size: 11px; color: #6b7280; text-transform: uppercase;">Distribuição Estratégica</div>
+            <div class="kpi-val" style="font-size: 14px; padding-top: 3px;">Equilibrada</div>
           </div>
         </div>
 
@@ -255,8 +251,6 @@ export class ExportService {
           <tbody>
             ${tableRows}
           </tbody>
-        </table>
-
         <div class="page-break"></div>
 
         <h2>2. Detalhamento Estratégico por Dia (Rope Drop & Atrações)</h2>

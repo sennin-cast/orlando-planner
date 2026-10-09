@@ -5,10 +5,6 @@ export function renderRestaurantDetailsModal(restaurantId: string): string {
   if (!restaurant) return '';
 
   const isFav = diningService.isFavorite(restaurantId);
-  const evidences = diningService.getEvidencesForRestaurant(restaurantId);
-  const sources = restaurant.source_ids
-    .map(id => diningService.getSourceById(id))
-    .filter(Boolean);
 
   // Status Operacional Badge
   let statusBadge = '';
@@ -27,13 +23,13 @@ export function renderRestaurantDetailsModal(restaurantId: string): string {
       </div>
     `;
   } else {
-    statusBadge = '<span class="text-xs px-2 py-0.5 rounded-full bg-[#fef7ed] text-[#8f5700] font-bold">Aguardando Confirmação Operacional</span>';
+    statusBadge = '<span class="text-xs px-2 py-0.5 rounded-full bg-[#fef7ed] text-[#8f5700] font-bold">Confirmação Recomendada</span>';
     statusAlert = `
       <div class="p-3 rounded-xl bg-[#fef7ed] border border-[#ffdeaa] flex items-start gap-2.5 text-xs text-[#5f4100]">
         <span class="material-symbols-outlined text-[18px] shrink-0">info</span>
         <div>
-          <span class="font-bold block">Informação Editorial vs. Operacional:</span>
-          <span>Os dados de atendimento, cardápio e preços são referências editoriais e necessitam de checagem prévia nas fontes oficiais antes da sua visita em maio de 2027. Não garantimos preços fixos ou disponibilidade sem confirmação oficial.</span>
+          <span class="font-bold block">Planejamento de Viagem:</span>
+          <span>Consulte horários exatos de funcionamento e cardápios no aplicativo oficial do parque ou centro comercial antes da visita.</span>
         </div>
       </div>
     `;
@@ -214,39 +210,18 @@ export function renderRestaurantDetailsModal(restaurantId: string): string {
             </div>
           </div>
 
-          <!-- Fontes Editoriais Consultadas (Vai pra Disney?) -->
-          <div class="p-3.5 rounded-xl bg-surface-container-low border border-outline-variant/20 space-y-2">
-            <h3 class="font-bold text-xs text-on-surface flex items-center gap-1.5">
-              <span class="material-symbols-outlined text-[16px] text-primary">menu_book</span>
-              <span>Referências Editoriais (Vai pra Disney?)</span>
-            </h3>
-            <p class="text-[11px] text-outline">
-              Informações qualitativas, dicas e avaliações baseadas no portal editorial brasileiro especializado:
-            </p>
-            <div class="space-y-1.5">
-              ${sources.map(src => `
-                <div class="flex items-center justify-between p-2 rounded-lg bg-surface border border-outline-variant/15">
-                  <div class="truncate pr-2">
-                    <span class="font-semibold text-on-surface block truncate">${src?.article_title}</span>
-                    <span class="text-[10px] text-outline">Fonte: ${src?.publisher}</span>
-                  </div>
-                  <a href="${src?.canonical_url}" target="_blank" rel="noopener noreferrer" class="shrink-0 text-primary hover:underline font-semibold text-[11px] flex items-center gap-0.5">
-                    <span>Ler avaliação original</span>
-                    <span class="material-symbols-outlined text-[12px]">open_in_new</span>
-                  </a>
-                </div>
-              `).join('')}
+          <!-- Endereço & Site Oficial -->
+          <div class="p-3.5 rounded-xl bg-surface-container-low border border-outline-variant/20 space-y-1.5">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] text-outline font-bold uppercase tracking-wider">Endereço & Localização</span>
+              ${restaurant.official_url ? `
+                <a href="${restaurant.official_url}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline font-semibold text-[11px] flex items-center gap-0.5">
+                  <span>Site Oficial</span>
+                  <span class="material-symbols-outlined text-[12px]">open_in_new</span>
+                </a>
+              ` : ''}
             </div>
-            ${evidences.length > 0 ? `
-              <div class="pt-1.5 space-y-1">
-                <span class="text-[10px] font-bold text-outline uppercase tracking-wider block">Notas e Fatos Extraídos:</span>
-                ${evidences.map(ev => `
-                  <div class="p-2 rounded bg-surface border border-outline-variant/15 text-[11px] text-on-surface-variant italic leading-relaxed">
-                    "${ev.source_excerpt_short}"
-                  </div>
-                `).join('')}
-              </div>
-            ` : ''}
+            <p class="font-medium text-on-surface">${restaurant.address || locationText}</p>
           </div>
         </div>
 

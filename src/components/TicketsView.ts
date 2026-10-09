@@ -159,7 +159,7 @@ export function renderTicketsView(
           <div class="flex items-center gap-2">
             <span class="material-symbols-outlined text-primary text-[20px]">policy</span>
             <h2 class="font-headline-sm text-sm font-bold text-on-surface uppercase tracking-wider">
-              Relatório de Conformidade e Auditoria
+              Verificação das Regras dos Ingressos
             </h2>
           </div>
           <span class="text-xs text-outline font-label-xs-mono">${validation.issues.length} notas emitidas</span>

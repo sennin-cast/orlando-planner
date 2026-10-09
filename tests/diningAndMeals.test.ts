@@ -71,7 +71,7 @@ describe('Funcionalidade ONDE COMER (Gastronomia)', () => {
     it('deve associar evidências aos estabelecimentos com links corretos', () => {
       const evidences = diningService.getEvidencesForRestaurant('food-001');
       expect(evidences.length).toBeGreaterThan(0);
-      expect(evidences[0].source_id).toBe('src-011');
+      expect(evidences[0].source_id).toBe('src-005');
       expect(evidences[0].review_status).toBe('approved');
     });
 

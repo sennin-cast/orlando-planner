@@ -1,4 +1,5 @@
 import { CrowdDataStore } from '../types/crowd';
+import { ItineraryDay } from '../types/itinerary';
 import { PARKS_CATALOG } from '../data/parksCatalog';
 import { CrowdDataService } from '../services/crowdDataService';
 import { ParkLiveWaitSummary } from '../services/queueTimesService';
@@ -18,7 +19,8 @@ export function renderCrowdView(
   selectedLiveParkId: string = 'magic-kingdom',
   liveData?: ParkLiveWaitSummary | null,
   selectedMonth: number = 5,
-  tripDatesList: string[] = []
+  tripDatesList: string[] = [],
+  itineraryDays: ItineraryDay[] = []
 ): string {
   const parkIds = Object.keys(PARKS_CATALOG).filter((id) => {
     if (operatorFilter === 'all') return true;
@@ -59,24 +61,33 @@ export function renderCrowdView(
     calendarGridCellsHtml += `<div class="p-2 min-h-[60px] sm:min-h-[76px] bg-surface-container-low/20 rounded-xl border border-dashed border-outline-variant/15 opacity-30"></div>`;
   }
 
+  let calendarListViewHtml = '';
+
   // Days of current month
   monthDays.forEach((dInfo) => {
     const isTripDay = tripDatesList.includes(dInfo.date);
     const style = CrowdDataService.getCrowdBadgeStyle(dInfo.crowdLevel);
+    const itinDay = itineraryDays.find((d) => d.date === dInfo.date);
+    const parkShort = itinDay ? (itinDay.parkId ? (PARKS_CATALOG[itinDay.parkId]?.shortName || itinDay.title) : itinDay.title) : null;
+    const isLocked = itinDay?.isLocked || false;
+    const crowdDisplay = dInfo.crowdLevel !== null && dInfo.crowdLevel !== undefined ? `${dInfo.crowdLevel}/10` : 'Lotação n/d';
 
     calendarGridCellsHtml += `
       <div 
-        class="p-2 sm:p-2.5 min-h-[60px] sm:min-h-[76px] rounded-xl border transition-all flex flex-col justify-between cursor-pointer group hover:scale-[1.02] ${style.bgClass} ${style.borderClass} ${
+        class="p-2 sm:p-2.5 min-h-[68px] sm:min-h-[82px] rounded-xl border transition-all flex flex-col justify-between cursor-pointer group hover:scale-[1.02] ${style.bgClass} ${style.borderClass} ${
           isTripDay ? 'ring-2 ring-primary shadow-sm' : ''
         }"
-        title="${dInfo.date}: Nível ${dInfo.crowdLevel}/10 (${style.label})${isTripDay ? ' • Dia do seu Roteiro!' : ''}"
+        title="${dInfo.date}: Nível ${crowdDisplay} (${style.label})${isTripDay ? ` • ${parkShort || 'Dia do seu Roteiro!'}` : ''}${isLocked ? ' [Data Bloqueada]' : ''}"
         data-date="${dInfo.date}"
       >
         <div class="flex items-center justify-between">
           <span class="font-bold text-xs sm:text-sm text-on-surface">${dInfo.day}</span>
           ${
             isTripDay
-              ? '<span class="px-1.5 py-0.2 rounded-full bg-primary text-on-primary text-[9px] font-bold">Roteiro</span>'
+              ? `<span class="px-1.5 py-0.2 rounded-full bg-primary text-on-primary text-[9px] font-bold flex items-center gap-0.5 truncate max-w-[55px] sm:max-w-[70px]">
+                  <span class="truncate">${parkShort || 'Roteiro'}</span>
+                  ${isLocked ? '<span class="material-symbols-outlined text-[10px]">lock</span>' : ''}
+                </span>`
               : ''
           }
         </div>
@@ -84,13 +95,43 @@ export function renderCrowdView(
         <div class="flex items-end justify-between mt-1">
           <div class="flex flex-col">
             <span class="font-label-xs-mono text-xs sm:text-sm font-extrabold ${style.textClass}">
-              ${dInfo.crowdLevel}/10
+              ${crowdDisplay}
             </span>
             <span class="text-[9px] text-outline font-medium hidden sm:inline-block">${dInfo.season}</span>
           </div>
           <span class="text-[10px] sm:text-xs material-symbols-outlined ${style.textClass}">
-            ${dInfo.crowdLevel <= 3 ? 'sentiment_satisfied' : dInfo.crowdLevel <= 6 ? 'sentiment_neutral' : 'sentiment_very_dissatisfied'}
+            ${dInfo.crowdLevel !== null && dInfo.crowdLevel <= 3 ? 'sentiment_satisfied' : dInfo.crowdLevel !== null && dInfo.crowdLevel <= 6 ? 'sentiment_neutral' : 'sentiment_very_dissatisfied'}
           </span>
+        </div>
+      </div>
+    `;
+
+    calendarListViewHtml += `
+      <div class="p-3 rounded-xl border flex items-center justify-between gap-3 transition-colors ${style.bgClass} ${style.borderClass} ${
+        isTripDay ? 'ring-2 ring-primary shadow-xs' : ''
+      }">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-10 text-center shrink-0">
+            <span class="text-sm font-bold text-on-surface">${String(dInfo.day).padStart(2, '0')}/${String(selectedMonth).padStart(2, '0')}</span>
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="font-bold text-xs ${style.textClass}">${crowdDisplay}</span>
+              <span class="text-[11px] text-outline font-medium">(${style.label})</span>
+            </div>
+            <span class="text-[10px] text-outline block truncate">${dInfo.season}</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+          ${
+            itinDay
+              ? `<span class="px-2 py-0.5 rounded-full bg-primary text-on-primary text-[10px] font-bold flex items-center gap-1">
+                  <span>${parkShort}</span>
+                  ${isLocked ? '<span class="material-symbols-outlined text-[11px]">lock</span>' : ''}
+                </span>`
+              : ''
+          }
         </div>
       </div>
     `;
@@ -542,30 +583,49 @@ export function renderCrowdView(
         </div>
       </section>
 
-      <!-- Monthly Calendar Heatmap Grid -->
-      <section class="bg-surface-container-lowest p-4 sm:p-5 rounded-2xl border border-outline-variant/30 shadow-2xs space-y-3">
-        <div class="flex items-center justify-between">
+      <!-- Monthly Calendar Heatmap Grid & List View -->
+      <section class="bg-surface-container-lowest p-4 sm:p-5 pb-8 sm:pb-10 rounded-2xl border border-outline-variant/30 shadow-2xs space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <h3 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-outline flex items-center gap-1.5">
             <span class="material-symbols-outlined text-[18px] text-primary">calendar_view_month</span>
             <span>Grade Diária de Lotação — ${monthMeta.name} 2027</span>
           </h3>
-          <span class="text-[11px] text-outline">Toque no dia para ver recomendações</span>
+
+          <div class="flex items-center gap-2">
+            <span class="text-[11px] text-outline hidden sm:inline-block">Toque no dia para ver detalhes</span>
+            <div class="flex items-center gap-1 bg-surface-container-low p-1 rounded-xl border border-outline-variant/20">
+              <button type="button" id="btn-crowd-view-grid" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-surface-container-lowest text-primary shadow-xs transition-colors">
+                Grade
+              </button>
+              <button type="button" id="btn-crowd-view-list" class="px-2.5 py-1 rounded-lg text-xs font-semibold text-on-surface-variant hover:text-on-surface transition-colors">
+                Lista
+              </button>
+            </div>
+          </div>
         </div>
 
-        <!-- Weekdays Header -->
-        <div class="grid grid-cols-7 gap-1.5 text-center text-xs font-bold text-outline uppercase pb-1">
-          <div>Dom</div>
-          <div>Seg</div>
-          <div>Ter</div>
-          <div>Qua</div>
-          <div>Qui</div>
-          <div>Sex</div>
-          <div>Sáb</div>
+        <!-- Grid Container -->
+        <div id="crowd-month-grid-container" class="space-y-2">
+          <!-- Weekdays Header -->
+          <div class="grid grid-cols-7 gap-1.5 text-center text-xs font-bold text-outline uppercase pb-1">
+            <div>Dom</div>
+            <div>Seg</div>
+            <div>Ter</div>
+            <div>Qua</div>
+            <div>Qui</div>
+            <div>Sex</div>
+            <div>Sáb</div>
+          </div>
+
+          <!-- Calendar Cells Grid -->
+          <div class="grid grid-cols-7 gap-1.5 sm:gap-2">
+            ${calendarGridCellsHtml}
+          </div>
         </div>
 
-        <!-- Calendar Cells Grid -->
-        <div class="grid grid-cols-7 gap-1.5 sm:gap-2">
-          ${calendarGridCellsHtml}
+        <!-- Mobile List Container (hidden by default on desktop, toggled or displayed on demand) -->
+        <div id="crowd-month-list-container" class="hidden space-y-2 max-h-[500px] overflow-y-auto pr-1">
+          ${calendarListViewHtml}
         </div>
       </section>
       `

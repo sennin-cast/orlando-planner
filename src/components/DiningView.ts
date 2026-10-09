@@ -1,17 +1,17 @@
 import { DiningFilterCriteria } from '../types/dining';
 import { diningService } from '../services/diningService';
 import { ItineraryDay } from '../types/itinerary';
+import { formatDateBr } from '../utils/dateUtils';
 
 export function renderDiningView(
   criteria: DiningFilterCriteria,
   itinerary: ItineraryDay[],
   selectedDayForSuggestions: string | null = null,
-  showAdminPanel: boolean = false
+  _showAdminPanel: boolean = false
 ): string {
   const allActive = diningService.getAllRestaurants(false);
   const filtered = diningService.filterRestaurants(criteria);
   const favorites = diningService.getFavorites();
-  const auditSummary = diningService.getAuditSummary();
 
   // Categorias em formato de pills horizontais
   const categories: { id: DiningFilterCriteria['categoryTab']; label: string; icon: string; count: number }[] = [
@@ -209,75 +209,6 @@ export function renderDiningView(
     `;
   }).join('');
 
-  // Painel Administrativo de Auditoria (Toggleable)
-  let adminSectionHtml = '';
-  if (showAdminPanel) {
-    adminSectionHtml = `
-      <section class="p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/40 space-y-4 shadow-sm animate-fade-in">
-        <div class="flex items-center justify-between border-b border-outline-variant/20 pb-3">
-          <div class="flex items-center gap-2">
-            <span class="material-symbols-outlined text-[22px] text-primary">admin_panel_settings</span>
-            <div>
-              <h2 class="font-bold text-sm text-on-surface">Painel Administrativo & Auditoria de Fontes</h2>
-              <p class="text-[11px] text-outline">Monitoramento de URLs descobertas, integridade de extração e governança de dados operacionais.</p>
-            </div>
-          </div>
-          <div class="flex items-center gap-2">
-            <button type="button" id="btn-export-catalog-csv" class="px-2.5 py-1 rounded-lg bg-surface border border-outline-variant/40 text-[11px] font-semibold text-on-surface hover:bg-surface-container flex items-center gap-1">
-              <span class="material-symbols-outlined text-[13px]">download</span> CSV Catálogo
-            </button>
-            <button type="button" id="btn-export-catalog-json" class="px-2.5 py-1 rounded-lg bg-surface border border-outline-variant/40 text-[11px] font-semibold text-on-surface hover:bg-surface-container flex items-center gap-1">
-              <span class="material-symbols-outlined text-[13px]">code</span> JSON Catálogo
-            </button>
-            <button type="button" id="btn-export-meals-csv" class="px-2.5 py-1 rounded-lg bg-surface border border-outline-variant/40 text-[11px] font-semibold text-on-surface hover:bg-surface-container flex items-center gap-1">
-              <span class="material-symbols-outlined text-[13px]">table_view</span> CSV Refeições
-            </button>
-          </div>
-        </div>
-
-        <!-- Métricas Administrativas -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5 text-center">
-          <div class="p-2.5 rounded-xl bg-surface-container-low border border-outline-variant/20">
-            <span class="text-[10px] text-outline block">Fontes Registradas</span>
-            <span class="font-label-xs-mono text-base font-bold text-primary">${auditSummary.sources_registered}</span>
-          </div>
-          <div class="p-2.5 rounded-xl bg-surface-container-low border border-outline-variant/20">
-            <span class="text-[10px] text-outline block">URLs Descobertas</span>
-            <span class="font-label-xs-mono text-base font-bold text-on-surface">${auditSummary.discovered_urls_count}</span>
-          </div>
-          <div class="p-2.5 rounded-xl bg-surface-container-low border border-outline-variant/20">
-            <span class="text-[10px] text-outline block">Artigos Processados</span>
-            <span class="font-label-xs-mono text-base font-bold text-on-surface">${auditSummary.articles_processed}</span>
-          </div>
-          <div class="p-2.5 rounded-xl bg-surface-container-low border border-outline-variant/20">
-            <span class="text-[10px] text-outline block">Erros de Coleta</span>
-            <span class="font-label-xs-mono text-base font-bold text-[#1b6443]">${auditSummary.errors_count}</span>
-          </div>
-          <div class="p-2.5 rounded-xl bg-surface-container-low border border-outline-variant/20">
-            <span class="text-[10px] text-outline block">Restaurantes</span>
-            <span class="font-label-xs-mono text-base font-bold text-primary">${auditSummary.restaurants_identified}</span>
-          </div>
-          <div class="p-2.5 rounded-xl bg-surface-container-low border border-outline-variant/20">
-            <span class="text-[10px] text-outline block">Duplicatas</span>
-            <span class="font-label-xs-mono text-base font-bold text-on-surface">${auditSummary.duplicates_count}</span>
-          </div>
-          <div class="p-2.5 rounded-xl bg-surface-container-low border border-outline-variant/20">
-            <span class="text-[10px] text-outline block">Aguardando Revisão</span>
-            <span class="font-label-xs-mono text-base font-bold text-[#8f5700]">${auditSummary.pending_review_count}</span>
-          </div>
-        </div>
-
-        <!-- Notas de Versão e Diferenças -->
-        <div class="p-3 rounded-xl bg-surface-container-low border border-outline-variant/20 space-y-1 text-xs">
-          <span class="font-semibold text-on-surface block">Relatório de Diferenças e Auditoria da Versão (${auditSummary.version} — ${auditSummary.last_execution_date}):</span>
-          <ul class="list-disc list-inside text-outline space-y-0.5 text-[11px]">
-            ${auditSummary.version_diff_notes.map((note: string) => `<li>${note}</li>`).join('')}
-          </ul>
-        </div>
-      </section>
-    `;
-  }
-
   // Lista de parques para o select de filtro
   const parkOptions = [
     { id: 'all', label: 'Todos os Parques' },
@@ -295,7 +226,7 @@ export function renderDiningView(
 
   // Lista de dias do roteiro para o seletor de sugestões
   const daySelectOptions = itinerary.map(d => {
-    return `<option value="${d.date}" ${selectedDayForSuggestions === d.date ? 'selected' : ''}>${d.date.substring(5)} (${d.dayOfWeek}) — ${d.title}</option>`;
+    return `<option value="${d.date}" ${selectedDayForSuggestions === d.date ? 'selected' : ''}>${formatDateBr(d.date)} (${d.dayOfWeek}) — ${d.title}</option>`;
   }).join('');
 
   return `
@@ -324,21 +255,8 @@ export function renderDiningView(
               ${daySelectOptions}
             </select>
           </div>
-
-          <!-- Botão Painel Administrativo -->
-          <button 
-            type="button" 
-            id="btn-toggle-admin-panel" 
-            class="px-3 py-2 rounded-xl text-xs font-semibold border border-outline-variant/30 flex items-center gap-1.5 transition-colors ${showAdminPanel ? 'bg-primary text-on-primary' : 'bg-surface-container-low text-on-surface hover:bg-surface-container'}"
-          >
-            <span class="material-symbols-outlined text-[16px]">tune</span>
-            <span>Auditoria & Fontes</span>
-          </button>
         </div>
       </section>
-
-      <!-- Painel Administrativo (se expandido) -->
-      ${adminSectionHtml}
 
       <!-- Painel de Sugestões do Dia (se selecionado) -->
       ${suggestionsHtml}
